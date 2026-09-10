@@ -38,7 +38,7 @@ const Profile = () => {
 
           <div className="max-sm:w-full w-132">
             <p className="mb-3 text-lg text-gray-500 max-md:text-center">
-                {profile.full_name}
+              {profile.full_name}
             </p>
             <h2 className="text-2xl xxs:text-3xl sm:text-4xl lg:text-[38px] text-[min(24px,38px)] max-md:text-center font-semibold mb-8">
               {profile.job_title}

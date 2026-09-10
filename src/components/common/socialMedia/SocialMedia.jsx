@@ -1,6 +1,5 @@
 import {
   faFacebook,
-  faGithub,
   faInstagram,
   faLinkedin,
   faWhatsapp,
@@ -13,7 +12,6 @@ const SocialMedia = ({ content }) => {
     { icon: faInstagram, link: content.instagram_url, label: "Instagram" },
     { icon: faWhatsapp, link: content.whatsapp_url, label: "WhatsApp" },
     { icon: faLinkedin, link: content.linkedin_url, label: "LinkedIn" },
-    { icon: faGithub, link: content.github_url, label: "GitHub" },
   ].filter((item) => item.link);
 
   return socialIcons.map((item) => (

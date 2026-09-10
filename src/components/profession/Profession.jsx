@@ -28,7 +28,7 @@ const Profession = () => {
         <p className="section-title max-md:text-center">Services</p>
         <div className="mt-6 text-[14px]">
           <p className="text-xs sm:text-lg font-normal text-gray-400 mb-4">
-            {content.home_text}
+            {content.services_text}
           </p>
           <p className="text-xs sm:text-lg font-normal text-gray-400">
             {content.about_text}

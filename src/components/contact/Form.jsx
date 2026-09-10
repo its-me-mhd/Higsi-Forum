@@ -43,7 +43,7 @@ const Form = ({ content }) => {
   return (
     <div>
       <p className="text-[12px] xs:text-[14px] max-lg:text-center sm:text-lg font-normal text-soft-dark">
-        {content.about_text}
+        {content.contact_text}
       </p>
       <div className="mx-2">
         <form className="flex flex-col gap-4 mt-4" onSubmit={handleSubmit}>

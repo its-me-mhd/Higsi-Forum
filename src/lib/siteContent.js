@@ -18,6 +18,11 @@ export const emptySiteContent = {
   facebook_url: "",
   instagram_url: "",
   whatsapp_url: "",
+  services_text: "",
+  contact_text: "",
+  experience_text: "",
+  projects_completed_text: "",
+  happy_clients_text: "",
 };
 
 export const useSiteContent = () => {
@@ -35,7 +40,7 @@ export const useSiteContent = () => {
       const { data, error: fetchError } = await supabase
         .from("site_content")
         .select(
-          "id, full_name, job_title, home_text, about_text, bio_text, avatar_url, cv_url, email, address, phone, github_url, linkedin_url, facebook_url, instagram_url, whatsapp_url",
+          "id, full_name, job_title, home_text, about_text, bio_text, avatar_url, cv_url, email, address, phone, linkedin_url, facebook_url, instagram_url, whatsapp_url, services_text, contact_text, experience_text, projects_completed_text, happy_clients_text",
         )
         .limit(1)
         .maybeSingle();
@@ -44,7 +49,7 @@ export const useSiteContent = () => {
         const { data: legacyData, error: legacyError } = await supabase
           .from("site_content")
           .select(
-            "id, full_name, job_title, bio_text, avatar_url, cv_url, email, github_url, linkedin_url",
+            "id, full_name, job_title, bio_text, avatar_url, cv_url, email, linkedin_url",
           )
           .limit(1)
           .maybeSingle();

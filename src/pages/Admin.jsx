@@ -11,11 +11,15 @@ const contentFields = [
   ["phone", "Phone number", "tel", true],
   ["home_text", "Home introduction", "textarea", true],
   ["about_text", "About text", "textarea", true],
+  ["services_text", "Services introduction", "textarea", true],
+  ["contact_text", "Contact introduction", "textarea", true],
+  ["experience_text", "Experience value", "text", false],
+  ["projects_completed_text", "Completed projects value", "text", false],
+  ["happy_clients_text", "Happy clients value", "text", false],
   ["facebook_url", "Facebook URL", "url", false],
   ["instagram_url", "Instagram URL", "url", false],
   ["whatsapp_url", "WhatsApp URL", "url", false],
   ["linkedin_url", "LinkedIn URL", "url", false],
-  ["github_url", "GitHub URL", "url", false],
 ];
 
 const Admin = () => {
@@ -61,10 +65,13 @@ const Admin = () => {
     ]).then(([contentResult, servicesResult]) => {
       const databaseError = contentResult.error || servicesResult.error;
       if (databaseError) {
+        const message = databaseError.message || "";
         setError(
-          databaseError.message?.toLowerCase().includes("services")
-            ? "The Services table is missing. Run supabase/add-services.sql in the same Supabase project, then reload this page."
-            : databaseError.message,
+          message.toLowerCase().includes("services")
+            ? "The Services table is missing. Run supabase/add-services.sql, then reload this page."
+            : message.toLowerCase().includes("schema cache")
+              ? "The CMS fields are not installed yet. Run supabase/add-profile-content-fields.sql, then reload this page."
+              : message,
         );
         return;
       }
@@ -107,9 +114,26 @@ const Admin = () => {
       return;
     }
     try {
-      const values = { ...content };
-      delete values.id;
-      delete values.created_at;
+      const values = {
+        full_name: content.full_name,
+        job_title: content.job_title,
+        email: content.email,
+        address: content.address,
+        phone: content.phone,
+        home_text: content.home_text,
+        about_text: content.about_text,
+        services_text: content.services_text,
+        contact_text: content.contact_text,
+        experience_text: content.experience_text || null,
+        projects_completed_text: content.projects_completed_text || null,
+        happy_clients_text: content.happy_clients_text || null,
+        facebook_url: content.facebook_url || null,
+        instagram_url: content.instagram_url || null,
+        whatsapp_url: content.whatsapp_url || null,
+        linkedin_url: content.linkedin_url || null,
+        avatar_url: content.avatar_url || null,
+        cv_url: content.cv_url || null,
+      };
       if (avatarFile)
         values.avatar_url = await uploadAsset(avatarFile, "avatars");
       if (cvFile) values.cv_url = await uploadAsset(cvFile, "cv");

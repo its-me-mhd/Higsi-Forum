@@ -1,7 +1,11 @@
 import Form from "./Form";
 import SocialMedia from "../common/socialMedia/SocialMedia";
 import { useSiteContent } from "../../lib/siteContent";
-import { faEnvelope, faLocationDot, faPhone } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEnvelope,
+  faLocationDot,
+  faPhone,
+} from "@fortawesome/free-solid-svg-icons";
 import Address from "./Address";
 
 const Contact = () => {
@@ -22,13 +26,31 @@ const Contact = () => {
                 {content.job_title}
               </p>
               <p className="text-[12px] xs:text-[14px] sm:text-lg md:text-lg max-lg:text-center pt-4 font-normal text-soft-dark">
-                {content.about_text}
+                {content.contact_text}
               </p>
             </div>
             <div className="my-8.75 sm:max-lg:flex justify-between items-center">
-              <Address item={{ icon: faLocationDot, title: "Location", description: content.address }} />
-              <Address item={{ icon: faEnvelope, title: "Email", description: content.email }} />
-              <Address item={{ icon: faPhone, title: "Call me", description: content.phone }} />
+              <Address
+                item={{
+                  icon: faLocationDot,
+                  title: "Location",
+                  description: content.address,
+                }}
+              />
+              <Address
+                item={{
+                  icon: faEnvelope,
+                  title: "Email",
+                  description: content.email,
+                }}
+              />
+              <Address
+                item={{
+                  icon: faPhone,
+                  title: "Call me",
+                  description: content.phone,
+                }}
+              />
             </div>
             <div className="w-full max-lg:text-center max-md:mb-4">
               <SocialMedia content={content} />

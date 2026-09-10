@@ -17,7 +17,8 @@ const Home = () => {
     return (
       <main className="flex min-h-screen items-center justify-center bg-white p-8 text-center">
         <p className="max-w-lg text-gray-600">
-          {error || "Add your site content in the admin dashboard to publish the website."}
+          {error ||
+            "Add your site content in the admin dashboard to publish the website."}
         </p>
       </main>
     );
