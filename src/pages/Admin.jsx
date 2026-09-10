@@ -13,13 +13,13 @@ const contentFields = [
   ["about_text", "About text", "textarea", true],
   ["services_text", "Services introduction", "textarea", true],
   ["contact_text", "Contact introduction", "textarea", true],
-  ["experience_text", "Experience value", "text", false],
-  ["projects_completed_text", "Completed projects value", "text", false],
-  ["happy_clients_text", "Happy clients value", "text", false],
-  ["facebook_url", "Facebook URL", "url", false],
-  ["instagram_url", "Instagram URL", "url", false],
-  ["whatsapp_url", "WhatsApp URL", "url", false],
-  ["linkedin_url", "LinkedIn URL", "url", false],
+  ["experience_text", "Experience value", "text", false, "e.g. 10 years"],
+  ["projects_completed_text", "Completed projects value", "text", false, "e.g. 50+"],
+  ["happy_clients_text", "Happy clients value", "text", false, "e.g. 100+"],
+  ["facebook_url", "Facebook URL", "url", false, "https://facebook.com/yourname"],
+  ["instagram_url", "Instagram URL", "url", false, "https://instagram.com/yourname"],
+  ["whatsapp_url", "WhatsApp URL", "url", false, "https://wa.me/491234567890"],
+  ["linkedin_url", "LinkedIn URL", "url", false, "https://linkedin.com/in/yourname"],
 ];
 
 const Admin = () => {
@@ -286,7 +286,7 @@ const Admin = () => {
             className="rounded-lg border border-[#e3e8ef] bg-white p-6 shadow-sm"
           >
             <div className="grid gap-4 md:grid-cols-2">
-              {contentFields.map(([name, label, type, required]) => (
+              {contentFields.map(([name, label, type, required, placeholder]) => (
                 <label
                   key={name}
                   className={`flex flex-col gap-2 text-sm font-medium text-[#344054] ${type === "textarea" ? "md:col-span-2" : ""}`}
@@ -297,6 +297,7 @@ const Admin = () => {
                       className="textarea textarea-bordered min-h-32 bg-white text-[#172033]"
                       name={name}
                       value={content[name] || ""}
+                      placeholder={placeholder}
                       onChange={(event) =>
                         setContent({ ...content, [name]: event.target.value })
                       }

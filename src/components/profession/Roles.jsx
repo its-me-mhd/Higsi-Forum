@@ -1,23 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const Roles = ({ role }) => {
   const [mouseHover, setMouseHover] = useState(false);
-  useEffect(() => {
-    window.addEventListener("mouseenter", (e) => {
-      console.log("Mouse entered on the: ", e.target);
-    });
-  }, []);
-
   return (
     <div
       onMouseEnter={() => setMouseHover(true)}
       onMouseLeave={() => setMouseHover(false)}
-      className="p-4 xs:p-8 bg-white hover:shadow-xl h-auto shadow-gray-300 ease-out duration-800 rounded-lg my-6 flex relative overflow-hidden"
+      className="group p-6 xs:p-8 bg-white hover:shadow-xl h-auto shadow-gray-300 ease-out duration-500 rounded-lg my-6 flex relative overflow-hidden border border-transparent hover:border-picto-primary/20"
     >
       <p
-        className={`bg-picto-primary absolute start-0 w-0 h-full mt-[-16px] xs:mt-[-32px] ${
-          mouseHover && "duration-200 w-[5px]"
-        }`}
+        className={`bg-picto-primary absolute inset-s-0 top-0 w-0 h-full transition-all duration-300 ${mouseHover ? "w-1.5" : ""}`}
       />
       <div>
         <p className="text-xl sm:text-2xl font-semibold text-gray-900 pb-4">

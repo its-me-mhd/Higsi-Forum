@@ -23,11 +23,11 @@ const Address = ({ item }) => {
           }`}
         />
       </div>
-      <div className="ms-3.25">
+      <div className="ms-3.25 min-w-0 flex-1">
         <p className="text-[12px] md:text-[14px] text-[#424E60] font-normal">
           {item?.title}:
         </p>
-        <p className="text-[14px] md:text-[16px] text-[#132238] font-medium">
+        <p className="break-words text-[14px] md:text-[16px] text-[#132238] font-medium">
           {item?.description}
         </p>
       </div>

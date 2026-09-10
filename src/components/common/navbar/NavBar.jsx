@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-scroll";
 import { useSiteContent } from "../../../lib/siteContent";
+import { scrollToSection } from "../../../lib/scrollToSection";
 
 const navItems = [
   { id: 1, name: "Home", url: "introduction" },
@@ -108,6 +109,7 @@ const NavBar = () => {
               className="btn btn-sm xs:btn-md sm:btn-lg btn-primary"
               href="#contact"
               to={`contact`}
+              onClick={(event) => scrollToSection(event, "contact")}
               smooth={true}
               duration={900}
             >

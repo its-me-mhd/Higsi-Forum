@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Roles from "./Roles";
 import { supabase } from "../../lib/supabase";
 import { useSiteContent } from "../../lib/siteContent";
+import { scrollToSection } from "../../lib/scrollToSection";
 
 const Profession = () => {
   const { content } = useSiteContent();
@@ -36,6 +37,7 @@ const Profession = () => {
         </div>
         <a
           href="#contact"
+          onClick={(event) => scrollToSection(event, "contact")}
           className="mt-5 md:mt-12.5 btn btn-primary text-white w-fit md:py-3 md:px-6 text-[12px] sm:text-[16px] font-semibold max-md:mx-auto max-md:mb-5"
         >
           Contact me

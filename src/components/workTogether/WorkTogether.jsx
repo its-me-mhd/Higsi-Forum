@@ -1,6 +1,7 @@
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSiteContent } from "../../lib/siteContent";
+import { scrollToSection } from "../../lib/scrollToSection";
 
 const WorkTogether = () => {
   const { content } = useSiteContent();
@@ -17,10 +18,11 @@ const WorkTogether = () => {
           {content.contact_text}
         </p>
         <a
-          href={`mailto:${content.email}`}
+          href="#contact"
+          onClick={(event) => scrollToSection(event, "contact")}
           className="btn btn-primary px-4 md:px-6.5 py-3 md:py-6 text-[12px] md:text-[16px]"
         >
-          Let's work Together
+          Contact me
           <FontAwesomeIcon
             icon={faArrowRight}
             size="l"

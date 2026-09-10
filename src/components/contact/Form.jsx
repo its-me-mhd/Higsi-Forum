@@ -1,3 +1,6 @@
+import emailjs from "@emailjs/browser";
+import { useState } from "react";
+
 const telegramSVG = (
   <svg
     className="w-4 md:w-6 aspect-square"
@@ -15,8 +18,6 @@ const telegramSVG = (
 const commonClass =
   "input input-lg border-0 border-b-2 focus:outline-none focus:placeholder:text-picto-primary placeholder:text-[15px] md:placeholder:text-lg focus:border-picto-primary border-[#E6E8EB] w-full rounded-none px-0";
 
-import { useState } from "react";
-
 const Form = ({ content }) => {
   const [form, setForm] = useState({
     name: "",
@@ -26,19 +27,44 @@ const Form = ({ content }) => {
     message: "",
   });
   const [error, setError] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const update = (event) =>
     setForm({ ...form, [event.target.name]: event.target.value });
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    setError("");
+    setSent(false);
     if (!/^[A-Za-z][A-Za-z '-]*$/.test(form.name)) {
       setError("Please enter a valid name using letters only.");
       return;
     }
 
-    const body = `Name: ${form.name}\nEmail: ${form.email}\nLocation: ${form.location}\n\n${form.message}`;
-    window.location.href = `mailto:${content.email}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(body)}`;
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+    if (!serviceId || !templateId || !publicKey) {
+      setError("Contact delivery is not configured yet.");
+      return;
+    }
+
+    setIsSending(true);
+    emailjs
+      .send(
+        serviceId,
+        templateId,
+        { ...form, to_email: content.email },
+        { publicKey },
+      )
+      .then(() => {
+        setForm({ name: "", email: "", location: "", subject: "", message: "" });
+        setSent(true);
+      })
+      .catch(() => setError("Your message could not be sent. Please try again."))
+      .finally(() => setIsSending(false));
   };
   return (
     <div>
@@ -95,11 +121,13 @@ const Form = ({ content }) => {
           />
           <button
             type="submit"
+            disabled={isSending}
             className="btn gap-3 max-lg:mx-auto btn-primary rounded-sm mt-5 text-[13px] md:text-[16px] w-fit font-semibold lg:mt-12.5 p-2 md:px-4"
           >
-            Submit {telegramSVG}
+            {isSending ? "Sending..." : "Send message"} {telegramSVG}
           </button>
           {error && <p className="text-sm text-red-600">{error}</p>}
+          {sent && <p className="text-sm text-green-600">Message sent successfully.</p>}
         </form>
       </div>
     </div>
