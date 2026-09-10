@@ -15,12 +15,11 @@ const telegramSVG = (
 const commonClass =
   "input input-lg border-0 border-b-2 focus:outline-none focus:placeholder:text-picto-primary placeholder:text-[15px] md:placeholder:text-lg focus:border-picto-primary border-[#E6E8EB] w-full rounded-none px-0";
 
-const Form = () => {
+const Form = ({ content }) => {
   return (
     <div>
       <p className="text-[12px] xs:text-[14px] max-lg:text-center sm:text-lg font-normal text-soft-dark">
-        I'm always open to discussing product design work or partnership
-        opportunities.
+        {content.bio_text}
       </p>
       <div className="mx-2">
         <form className="flex flex-col gap-4 mt-4">

@@ -1,34 +1,14 @@
-import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import SocialMedia from "../common/socialMedia/SocialMedia";
-import AdminProfileEditor from "./AdminProfileEditor";
-import { supabase } from "../../lib/supabase";
+import { useSiteContent } from "../../lib/siteContent";
 
 const Profile = () => {
-  const [profile, setProfile] = useState(null);
+  const { content: profile } = useSiteContent();
 
-  useEffect(() => {
-    if (!supabase) return;
+  if (!profile) return null;
 
-    const fetchProfile = async () => {
-      const { data } = await supabase
-        .from("profile_settings")
-        .select("id, name, title, bio_text, avatar_url, cv_url")
-        .limit(1)
-        .maybeSingle();
-
-      if (data) setProfile(data);
-    };
-
-    fetchProfile();
-  }, []);
-
-  if (!profile) return <AdminProfileEditor onSaved={setProfile} />;
-
-  const bioParagraphs = profile.bio_text
-    .split(/\n\s*\n/)
-    .filter(Boolean);
+  const bioParagraphs = profile.bio_text.split(/\n\s*\n/).filter(Boolean);
 
   return (
     <>
@@ -37,24 +17,24 @@ const Profile = () => {
         id="profile"
       >
         <div className="flex max-md:flex-col justify-between items-center gap-6">
-        {/* Profile image */}
-        <div className="xxl:max-w-106 w-auto h-auto xxl:max-h-126">
-          <div className="max-w-106 h-117 object-fill overflow-hidden rounded-xl">
-            <img
-              className="bg-soft-white h-[120%] object-cover"
-              src={profile.avatar_url}
-              alt={profile.name}
-            />
-          </div>
-          {/* Social media section */}
-          <div className="relative bottom-9">
-            <div className="flex justify-center">
-              <div className="px-6 max-w-66 py-3 z-50 text-center bg-white rounded-sm center shadow-2xl drop-shadow-2xl shadow-white">
-                <SocialMedia />
+          {/* Profile image */}
+          <div className="xxl:max-w-106 w-auto h-auto xxl:max-h-126">
+            <div className="max-w-106 h-117 object-fill overflow-hidden rounded-xl">
+              <img
+                className="bg-soft-white h-[120%] object-cover"
+                src={profile.avatar_url}
+                alt={profile.name}
+              />
+            </div>
+            {/* Social media section */}
+            <div className="relative bottom-9">
+              <div className="flex justify-center">
+                <div className="px-6 max-w-66 py-3 z-50 text-center bg-white rounded-sm center shadow-2xl drop-shadow-2xl shadow-white">
+                  <SocialMedia content={profile} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
           <div className="max-sm:w-full w-132">
             <p className="mb-3 text-lg text-gray-500 max-md:text-center">
@@ -89,7 +69,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <AdminProfileEditor onSaved={setProfile} />
     </>
   );
 };

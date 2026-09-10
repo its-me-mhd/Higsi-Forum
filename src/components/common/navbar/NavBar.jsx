@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-import logo from "../../../assets/logo.png";
 import { Link } from "react-scroll";
+import { useSiteContent } from "../../../lib/siteContent";
 
 const navItems = [
   { id: 1, name: "Home", url: "introduction" },
   { id: 2, name: "About", url: "profile" },
-  { id: 3, name: "Process", url: "work-process" },
-  { id: 4, name: "Portfolio", url: "portfolio" },
-  { id: 5, name: "Blog", url: "blog" },
-  { id: 6, name: "Services", url: "services" },
+  { id: 3, name: "Portfolio", url: "portfolio" },
 ];
 
 const handleMenuClick = () => {
@@ -39,6 +36,7 @@ const menu = navItems.map((item) => (
 
 const NavBar = () => {
   const [position, setPosition] = useState(0);
+  const { content } = useSiteContent();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,9 +90,11 @@ const NavBar = () => {
             duration={900}
             className="flex items-center border-0 lg:max-xxl:ps-5"
           >
-            <img src={logo} className="h-8 sm:h-14 rounded-2xl" alt="logo" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-picto-primary text-lg font-semibold text-white sm:h-14 sm:w-14 sm:text-2xl">
+              {content?.full_name?.charAt(0)}
+            </span>
             <p className="text-2xl sm:text-[32px] my-auto ms-[12px] font-semibold">
-              Brooklyn
+              {content?.full_name}
             </p>
           </Link>
         </div>
