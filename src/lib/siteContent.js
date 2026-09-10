@@ -23,6 +23,13 @@ export const emptySiteContent = {
   experience_text: "",
   projects_completed_text: "",
   happy_clients_text: "",
+  site_name: "",
+  home_heading: "",
+  about_heading: "",
+  services_heading: "What I do?",
+  contact_heading: "",
+  contact_left_heading: "",
+  contact_right_heading: "",
 };
 
 export const useSiteContent = () => {
@@ -40,7 +47,7 @@ export const useSiteContent = () => {
       const { data, error: fetchError } = await supabase
         .from("site_content")
         .select(
-          "id, full_name, job_title, home_text, about_text, bio_text, avatar_url, cv_url, email, address, phone, linkedin_url, facebook_url, instagram_url, whatsapp_url, services_text, contact_text, experience_text, projects_completed_text, happy_clients_text",
+          "id, full_name, job_title, site_name, home_heading, about_heading, services_heading, contact_heading, contact_left_heading, contact_right_heading, home_text, about_text, bio_text, avatar_url, cv_url, email, address, phone, linkedin_url, facebook_url, instagram_url, whatsapp_url, services_text, contact_text, experience_text, projects_completed_text, happy_clients_text",
         )
         .limit(1)
         .maybeSingle();

@@ -26,7 +26,7 @@ const Profession = () => {
       id="services"
     >
       <div className="flex flex-col justify-between h-fit md:pe-8 lg:pe-35.75 max-md:text-center my-auto">
-        <p className="section-title max-md:text-center">Services</p>
+        <p className="section-title max-md:text-center">{content.services_heading || "What I do?"}</p>
         <div className="mt-6 text-[14px]">
           <p className="text-xs sm:text-lg font-normal text-gray-400 mb-4">
             {content.services_text}
@@ -43,7 +43,7 @@ const Profession = () => {
           Contact me
         </a>
       </div>
-      <div className="">
+      <div className="max-h-[52rem] overflow-y-auto pe-3">
         {services.map((service) => (
           <Roles role={service} key={service.id} />
         ))}

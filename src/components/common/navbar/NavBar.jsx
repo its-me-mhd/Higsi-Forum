@@ -92,10 +92,10 @@ const NavBar = () => {
             className="flex items-center border-0 lg:max-xxl:ps-5"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-picto-primary text-lg font-semibold text-white sm:h-14 sm:w-14 sm:text-2xl">
-              {content?.full_name?.charAt(0)}
+              {(content?.site_name || content?.full_name)?.charAt(0)}
             </span>
             <p className="text-2xl sm:text-[32px] my-auto ms-[12px] font-semibold">
-              {content?.full_name}
+              {content?.site_name || content?.full_name}
             </p>
           </Link>
         </div>

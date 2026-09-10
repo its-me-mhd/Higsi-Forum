@@ -19,7 +19,7 @@ const Footer = () => {
             {content?.full_name?.charAt(0)}
           </span>
           <p className="text-3xl sm:text-[32px] my-auto ms-3 font-semibold">
-            {content?.full_name}
+            {content?.site_name || content?.full_name}
           </p>
         </a>
         <div className="mx-7 max-md:my-7 text-center">

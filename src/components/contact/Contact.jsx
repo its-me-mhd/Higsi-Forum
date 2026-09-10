@@ -19,11 +19,14 @@ const Contact = () => {
         className="content p-4 md:p-10 lg:p-22 bg-white rounded-2xl shadow-[0px_0px_90px_9px_rgba(0,0,0,0.1)]"
         id="contact"
       >
+        <h2 className="mb-8 text-center text-3xl font-semibold text-[#132238] md:text-4xl">
+          {content.contact_heading || content.contact_left_heading || content.job_title}
+        </h2>
         <div className="flex flex-col-reverse lg:gap-5 xl:gap-25.75 lg:flex-row justify-between">
           <div>
             <div>
               <p className="text-[35px] max-lg:hidden font-semibold text-nowrap text-[#132238]">
-                {content.job_title}
+                {content.contact_left_heading || content.contact_heading || content.job_title}
               </p>
               <p className="text-[12px] xs:text-[14px] sm:text-lg md:text-lg max-lg:text-center pt-4 font-normal text-soft-dark">
                 {content.contact_text}
@@ -58,7 +61,7 @@ const Contact = () => {
           </div>
           <div className="w-full overflow-y-scroll py-6.5">
             <p className="text-xl mb-2 xs:text-2xl sm:text-2xl md:text-[38px] font-semibold text-[#132238] lg:hidden text-center">
-              {content.job_title}
+              {content.contact_right_heading || content.contact_heading || content.job_title}
             </p>
             <Form content={content} />
           </div>

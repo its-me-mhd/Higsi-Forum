@@ -5,7 +5,14 @@ import { emptySiteContent } from "../lib/siteContent";
 const emptyService = { title: "", description: "", sort_order: 0 };
 const contentFields = [
   ["full_name", "Full name", "text", true],
+  ["site_name", "Header / site name", "text", true, "e.g. Nadiiro Abdirisak"],
   ["job_title", "Job title", "text", true],
+  ["home_heading", "Home heading", "text", true, "e.g. Hello, I am Nadiiro"],
+  ["about_heading", "About heading", "text", true, "e.g. About me"],
+  ["services_heading", "Services heading", "text", true, "e.g. What I do?"],
+  ["contact_heading", "Contact header", "text", true, "e.g. Get in touch"],
+  ["contact_left_heading", "Contact left heading", "text", true, "e.g. Contact details"],
+  ["contact_right_heading", "Contact right heading", "text", true, "e.g. Send a message"],
   ["email", "Contact email", "email", true],
   ["address", "Location / address", "text", true],
   ["phone", "Phone number", "tel", true],
@@ -116,7 +123,14 @@ const Admin = () => {
     try {
       const values = {
         full_name: content.full_name,
+        site_name: content.site_name,
         job_title: content.job_title,
+        home_heading: content.home_heading,
+        about_heading: content.about_heading,
+        services_heading: content.services_heading,
+        contact_heading: content.contact_heading,
+        contact_left_heading: content.contact_left_heading,
+        contact_right_heading: content.contact_right_heading,
         email: content.email,
         address: content.address,
         phone: content.phone,
