@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { isAdminUser, supabase } from "../../lib/supabase";
+import {
+  isAdminUser,
+  isSupabaseConfigured,
+  supabase,
+} from "../../lib/supabase";
 import AdminLogin from "./AdminLogin";
 import Projects from "./Projects";
 import UploadForm from "./UploadForm";
@@ -10,6 +14,8 @@ const Portfolio = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!supabase) return;
+
     const fetchProjects = async () => {
       const { data, error: fetchError } = await supabase
         .from("projects")
@@ -30,6 +36,8 @@ const Portfolio = () => {
   }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+
     let isMounted = true;
 
     const loadAdminUser = async () => {
@@ -75,7 +83,9 @@ const Portfolio = () => {
           }
         />
       )}
-      {error && <p className="mb-6 text-center text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="mb-6 text-center text-sm text-red-600">{error}</p>
+      )}
       <div className="mx-auto flex justify-center">
         <div className="grid xl:grid-cols-3 md:grid-cols-2 gap-6">
           {projectData.map((data) => (
@@ -97,6 +107,12 @@ const Portfolio = () => {
           More Project
         </a>
       </div>
+      {!isSupabaseConfigured && (
+        <p className="mb-6 text-center text-sm text-gray-500">
+          Supabase is not configured yet. Add the values from your Supabase
+          project to .env.local.
+        </p>
+      )}
     </div>
   );
 };

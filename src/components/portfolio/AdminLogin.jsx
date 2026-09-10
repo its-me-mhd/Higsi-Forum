@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { isSupabaseConfigured, supabase } from "../../lib/supabase";
 
 const AdminLogin = ({ adminUser, onAuthenticated }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,9 +13,10 @@ const AdminLogin = ({ adminUser, onAuthenticated }) => {
     setError("");
     setIsSubmitting(true);
 
-    const { data, error: loginError } = await supabase.auth.signInWithPassword(
-      { email, password },
-    );
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (loginError) {
       setError("Unable to sign in with those credentials.");
@@ -32,6 +33,8 @@ const AdminLogin = ({ adminUser, onAuthenticated }) => {
     await supabase.auth.signOut();
     onAuthenticated(null);
   };
+
+  if (!isSupabaseConfigured) return null;
 
   return (
     <div className="mt-10 text-center">
@@ -68,7 +71,10 @@ const AdminLogin = ({ adminUser, onAuthenticated }) => {
             className="w-full max-w-md rounded-lg bg-white p-6 text-left shadow-2xl"
           >
             <div className="mb-6 flex items-center justify-between">
-              <h2 id="admin-login-title" className="text-xl font-semibold text-gray-900">
+              <h2
+                id="admin-login-title"
+                className="text-xl font-semibold text-gray-900"
+              >
                 Owner login
               </h2>
               <button
