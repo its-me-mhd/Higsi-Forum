@@ -5,7 +5,7 @@ import { useSiteContent } from "../../../lib/siteContent";
 const navItems = [
   { id: 1, name: "Home", url: "introduction" },
   { id: 2, name: "About", url: "profile" },
-  { id: 3, name: "Portfolio", url: "portfolio" },
+  { id: 3, name: "Services", url: "services" },
 ];
 
 const handleMenuClick = () => {

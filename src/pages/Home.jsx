@@ -1,7 +1,7 @@
 import Introduction from "../components/introduction/Introduction";
 import Profile from "../components/profile/Profile";
-import Portfolio from "../components/portfolio/Portfolio";
 import WorkTogether from "../components/workTogether/WorkTogether";
+import Profession from "../components/profession/Profession";
 import Contact from "../components/contact/Contact";
 import "../../index.css";
 
@@ -14,7 +14,7 @@ const Home = () => {
           <Profile />
         </div>
       </div>
-      <Portfolio />
+      <Profession />
       <div className="bg-gray-900">
         <WorkTogether />
       </div>

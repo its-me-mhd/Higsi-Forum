@@ -1,6 +1,8 @@
 import Form from "./Form";
 import SocialMedia from "../common/socialMedia/SocialMedia";
 import { useSiteContent } from "../../lib/siteContent";
+import { faEnvelope, faLocationDot, faPhone } from "@fortawesome/free-solid-svg-icons";
+import Address from "./Address";
 
 const Contact = () => {
   const { content } = useSiteContent();
@@ -20,14 +22,13 @@ const Contact = () => {
                 {content.job_title}
               </p>
               <p className="text-[12px] xs:text-[14px] sm:text-lg md:text-lg max-lg:text-center pt-4 font-normal text-soft-dark">
-                I'm available for freelance work. Drop me a line if you have a
-                project you think I'd be a good fit for.
+                {content.about_text}
               </p>
             </div>
             <div className="my-8.75 sm:max-lg:flex justify-between items-center">
-              <a className="block p-6 text-[#132238]" href={`mailto:${content.email}`}>
-                {content.email}
-              </a>
+              <Address item={{ icon: faLocationDot, title: "Location", description: content.address }} />
+              <Address item={{ icon: faEnvelope, title: "Email", description: content.email }} />
+              <Address item={{ icon: faPhone, title: "Call me", description: content.phone }} />
             </div>
             <div className="w-full max-lg:text-center max-md:mb-4">
               <SocialMedia content={content} />

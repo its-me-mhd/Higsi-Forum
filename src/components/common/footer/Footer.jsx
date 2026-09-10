@@ -4,7 +4,7 @@ import { useSiteContent } from "../../../lib/siteContent";
 const navItems = [
   { id: 1, name: "Home", url: "Home" },
   { id: 2, name: "About", url: "About" },
-  { id: 3, name: "Portfolio", url: "Portfolio" },
+  { id: 3, name: "Services", url: "Services" },
   { id: 4, name: "Contact", url: "Contact" },
 ];
 

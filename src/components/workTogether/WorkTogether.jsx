@@ -14,7 +14,7 @@ const WorkTogether = () => {
           {content.job_title}
         </p>
         <p className="text-[#A5ACB5] text-xs sm:text-lg font-normal text-center pb-8">
-          {content.bio_text}
+          {content.home_text}
         </p>
         <a
           href={`mailto:${content.email}`}

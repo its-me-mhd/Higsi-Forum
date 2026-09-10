@@ -15,52 +15,82 @@ const telegramSVG = (
 const commonClass =
   "input input-lg border-0 border-b-2 focus:outline-none focus:placeholder:text-picto-primary placeholder:text-[15px] md:placeholder:text-lg focus:border-picto-primary border-[#E6E8EB] w-full rounded-none px-0";
 
+import { useState } from "react";
+
 const Form = ({ content }) => {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    location: "",
+    subject: "",
+    message: "",
+  });
+  const [error, setError] = useState("");
+
+  const update = (event) =>
+    setForm({ ...form, [event.target.name]: event.target.value });
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!/^[A-Za-z][A-Za-z '-]*$/.test(form.name)) {
+      setError("Please enter a valid name using letters only.");
+      return;
+    }
+
+    const body = `Name: ${form.name}\nEmail: ${form.email}\nLocation: ${form.location}\n\n${form.message}`;
+    window.location.href = `mailto:${content.email}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(body)}`;
+  };
   return (
     <div>
       <p className="text-[12px] xs:text-[14px] max-lg:text-center sm:text-lg font-normal text-soft-dark">
-        {content.bio_text}
+        {content.about_text}
       </p>
       <div className="mx-2">
-        <form className="flex flex-col gap-4 mt-4">
+        <form className="flex flex-col gap-4 mt-4" onSubmit={handleSubmit}>
           <input
             type="text"
+            name="name"
+            value={form.name}
+            onChange={update}
             placeholder="Name*"
             className={`${commonClass}`}
             required
           />
           <input
             type="email"
+            name="email"
+            value={form.email}
+            onChange={update}
             placeholder="Email*"
             className={`${commonClass}`}
             required
           />
           <input
             type="text"
+            name="location"
+            value={form.location}
+            onChange={update}
             placeholder="Location*"
             className={`${commonClass}`}
             required
           />
 
-          <div className="flex max-xs:flex-col max-xs:gap-4">
-            <input
-              type="text"
-              placeholder="Budget*"
-              className={`${commonClass} xs:w-[50%] me-5`}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Subject*"
-              className={`${commonClass}`}
-              required
-            />
-          </div>
-
           <input
             type="text"
+            name="subject"
+            value={form.subject}
+            onChange={update}
+            placeholder="Subject*"
+            className={commonClass}
+            required
+          />
+
+          <textarea
+            name="message"
+            value={form.message}
+            onChange={update}
             placeholder="Message*"
-            className={`${commonClass}`}
+            className={`${commonClass} min-h-24`}
             required
           />
           <button
@@ -69,6 +99,7 @@ const Form = ({ content }) => {
           >
             Submit {telegramSVG}
           </button>
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </form>
       </div>
     </div>

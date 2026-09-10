@@ -1,10 +1,19 @@
-import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import {
+  faFacebook,
+  faGithub,
+  faInstagram,
+  faLinkedin,
+  faWhatsapp,
+} from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const SocialMedia = ({ content }) => {
   const socialIcons = [
-    { icon: faGithub, link: content.github_url, label: "GitHub" },
+    { icon: faFacebook, link: content.facebook_url, label: "Facebook" },
+    { icon: faInstagram, link: content.instagram_url, label: "Instagram" },
+    { icon: faWhatsapp, link: content.whatsapp_url, label: "WhatsApp" },
     { icon: faLinkedin, link: content.linkedin_url, label: "LinkedIn" },
+    { icon: faGithub, link: content.github_url, label: "GitHub" },
   ].filter((item) => item.link);
 
   return socialIcons.map((item) => (

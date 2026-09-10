@@ -8,7 +8,7 @@ const Profile = () => {
 
   if (!profile) return null;
 
-  const bioParagraphs = profile.bio_text.split(/\n\s*\n/).filter(Boolean);
+  const bioParagraphs = profile.about_text.split(/\n\s*\n/).filter(Boolean);
 
   return (
     <>
@@ -23,7 +23,7 @@ const Profile = () => {
               <img
                 className="bg-soft-white h-[120%] object-cover"
                 src={profile.avatar_url}
-                alt={profile.name}
+                alt={profile.full_name}
               />
             </div>
             {/* Social media section */}
@@ -38,10 +38,10 @@ const Profile = () => {
 
           <div className="max-sm:w-full w-132">
             <p className="mb-3 text-lg text-gray-500 max-md:text-center">
-              {profile.name}
+                {profile.full_name}
             </p>
             <h2 className="text-2xl xxs:text-3xl sm:text-4xl lg:text-[38px] text-[min(24px,38px)] max-md:text-center font-semibold mb-8">
-              {profile.title}
+              {profile.job_title}
             </h2>
             <div className="text-xs xs:text-[16px] lg:text-lg font-normal max-md:text-center text-gray-600">
               {bioParagraphs.map((paragraph) => (
@@ -53,9 +53,9 @@ const Profile = () => {
             <div className="mt-8 flex max-md:justify-center">
               <a
                 className="btn xxs:btn-lg px-6 max-xs:px-2 xxs:py-3 btn-primary text-xs xxs:text-[14px] sm:text-[16px]"
-                href="#portfolio"
+                href="#services"
               >
-                My Projects
+                My Services
               </a>
               <a
                 className="btn xxs:btn-lg px-6 max-xs:px-2 xxs:py-3 hover:border-picto-primary bg-white duration-300 transition-all hover:text-picto-primary ms-4 text-xs xxs:text-[14px] sm:text-[16px]"

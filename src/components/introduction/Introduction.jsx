@@ -20,14 +20,14 @@ const Introduction = () => {
             </span>
           </p>
           <p className="text-xs xxs:text-lg lg:text-[18px] my-6">
-            {content.bio_text}
+            {content.home_text}
           </p>
           <p className="text-center lg:text-start">
             <a
               className="btn-primary btn btn-xs xxs:btn-lg text-white"
-              href={`mailto:${content.email}`}
+              href="#contact"
             >
-              Say Hello!
+              Contact me
             </a>
           </p>
         </div>

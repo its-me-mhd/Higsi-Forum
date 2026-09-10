@@ -12,6 +12,19 @@ create table if not exists public.site_content (
   linkedin_url text not null
 );
 
+alter table public.site_content add column if not exists home_text text not null default '';
+alter table public.site_content add column if not exists about_text text not null default '';
+alter table public.site_content add column if not exists address text not null default '';
+alter table public.site_content add column if not exists phone text not null default '';
+alter table public.site_content add column if not exists facebook_url text;
+alter table public.site_content add column if not exists instagram_url text;
+alter table public.site_content add column if not exists whatsapp_url text;
+alter table public.site_content alter column github_url drop not null;
+alter table public.site_content alter column linkedin_url drop not null;
+alter table public.site_content alter column bio_text drop not null;
+alter table public.site_content alter column avatar_url drop not null;
+alter table public.site_content alter column cv_url drop not null;
+
 create table if not exists public.projects (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -22,8 +35,17 @@ create table if not exists public.projects (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.services (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text not null,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
 alter table public.site_content enable row level security;
 alter table public.projects enable row level security;
+alter table public.services enable row level security;
 
 drop policy if exists "Public can read site content" on public.site_content;
 drop policy if exists "Owner can insert site content" on public.site_content;
@@ -31,6 +53,10 @@ drop policy if exists "Owner can update site content" on public.site_content;
 drop policy if exists "Public can read projects" on public.projects;
 drop policy if exists "Owner can insert projects" on public.projects;
 drop policy if exists "Owner can delete projects" on public.projects;
+drop policy if exists "Public can read services" on public.services;
+drop policy if exists "Owner can insert services" on public.services;
+drop policy if exists "Owner can update services" on public.services;
+drop policy if exists "Owner can delete services" on public.services;
 
 create policy "Public can read site content"
 on public.site_content for select
@@ -58,6 +84,26 @@ with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
 
 create policy "Owner can delete projects"
 on public.projects for delete
+to authenticated
+using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+
+create policy "Public can read services"
+on public.services for select
+to anon, authenticated using (true);
+
+create policy "Owner can insert services"
+on public.services for insert
+to authenticated
+with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+
+create policy "Owner can update services"
+on public.services for update
+to authenticated
+using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid)
+with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+
+create policy "Owner can delete services"
+on public.services for delete
 to authenticated
 using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
 
