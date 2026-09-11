@@ -30,23 +30,6 @@ export const emptySiteContent = {
   contact_heading: "",
   contact_left_heading: "",
   contact_right_heading: "",
-  hero_eyebrow: "Development & Community Empowerment Organization",
-  about_supporting_text: "",
-  vision_text: "",
-  mission_text: "",
-  programs_heading: "Practical programs. Meaningful progress.",
-  programs_text: "",
-  impact_heading: "Creating opportunities. Building capacity. Inspiring change.",
-  impact_text: "",
-  partnerships_heading: "Let’s build the next chapter together.",
-  partnerships_text: "",
-  collaboration_heading: "Collaboration areas",
-  collaboration_items: "",
-  impact_youth: "320+",
-  impact_women: "180+",
-  impact_teachers: "200+",
-  impact_communities: "15+",
-  impact_partnerships: "12",
 };
 
 export const useSiteContent = () => {
