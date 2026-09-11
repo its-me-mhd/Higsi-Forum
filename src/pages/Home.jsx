@@ -1,42 +1,141 @@
-import Introduction from "../components/introduction/Introduction";
-import Profile from "../components/profile/Profile";
-import WorkTogether from "../components/workTogether/WorkTogether";
-import Profession from "../components/profession/Profession";
-import Contact from "../components/contact/Contact";
-import { useSiteContent } from "../lib/siteContent";
-import "../../index.css";
+import { useState } from "react";
+
+const focusAreas = [
+  "Education",
+  "Skills Development",
+  "Youth Empowerment",
+  "Women Empowerment",
+  "Leadership",
+  "Community Development",
+];
+
+const programs = [
+  {
+    number: "01",
+    title: "Youth Empowerment & Skills Development",
+    text: "Practical pathways to confidence, employability, leadership, communication, entrepreneurship, and career readiness.",
+    tags: "Life skills · Public speaking · CV & interview skills",
+  },
+  {
+    number: "02",
+    title: "Women Empowerment",
+    text: "Inclusive development programs that strengthen personal growth, digital confidence, financial awareness, and business capacity.",
+    tags: "Business skills · Leadership · Digital skills",
+  },
+  {
+    number: "03",
+    title: "Teacher Training & Professional Development",
+    text: "Relevant, classroom-ready learning for educators who want to improve teaching quality and support every learner.",
+    tags: "Active learning · AI in education · Safeguarding",
+  },
+  {
+    number: "04",
+    title: "Education & Capacity Building",
+    text: "Workshops and training-of-trainers programs that turn knowledge into capability across institutions and communities.",
+    tags: "Academic skills · Educational leadership · Community education",
+  },
+  {
+    number: "05",
+    title: "Leadership & Personal Development",
+    text: "Human-centered development for people ready to lead with self-awareness, resilience, good judgment, and purpose.",
+    tags: "Emotional intelligence · Decision making · Conflict management",
+  },
+  {
+    number: "06",
+    title: "Community Development",
+    text: "Locally grounded initiatives that build participation, awareness, resilience, innovation, and shared ownership.",
+    tags: "Youth participation · Women participation · Local innovation",
+  },
+  {
+    number: "07",
+    title: "Entrepreneurship & Innovation",
+    text: "A practical space for new ideas, business capacity, and economic opportunities, especially for youth and women.",
+    tags: "Ideas · Business capacity · Economic opportunity",
+  },
+];
+
+const impactItems = [
+  ["320+", "Youth trained and empowered"],
+  ["180+", "Women reached through capacity building"],
+  ["200+", "Teachers supported through development"],
+  ["15+", "Communities engaged in initiatives"],
+  ["12", "Partnerships with local stakeholders"],
+];
+
+const collaborationAreas = [
+  "Project partnerships",
+  "Training partnerships",
+  "Community development initiatives",
+  "Research and education programs",
+  "Youth and women empowerment projects",
+  "Capacity-building projects",
+  "Consultancy and technical support",
+  "Joint programs and events",
+];
 
 const Home = () => {
-  const { content, error, isLoading } = useSiteContent();
-
-  if (isLoading) {
-    return <main className="min-h-screen bg-white" />;
-  }
-
-  if (!content) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-white p-8 text-center">
-        <p className="max-w-lg text-gray-600">
-          {error ||
-            "Add your site content in the admin dashboard to publish the website."}
-        </p>
-      </main>
-    );
-  }
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   return (
-    <div className="relative">
-      <div className="introduction-profile-background">
-        <div className="content">
-          <Introduction />
-          <Profile />
+    <div className="higsi-site">
+      <header className="site-header">
+        <div className="site-container header-inner">
+          <a className="brand" href="#home" onClick={() => setMenuOpen(false)}>
+            <span className="brand-mark">H</span>
+            <span><strong>Higsi</strong> Forum</span>
+          </a>
+          <button className="menu-toggle" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button>
+          <nav className={`site-nav ${menuOpen ? "is-open" : ""}`}>
+            {["Home", "About Us", "Programs", "Our Impact", "Partnerships", "Contact Us"].map((item) => (
+              <a key={item} href={`#${item.toLowerCase().replaceAll(" ", "-")}`} onClick={() => setMenuOpen(false)}>{item}</a>
+            ))}
+            <a className="nav-cta" href="#contact-us" onClick={() => setMenuOpen(false)}>Partner with us</a>
+          </nav>
         </div>
-      </div>
-      <Profession />
-      <div className="bg-gray-900">
-        <WorkTogether />
-      </div>
-      <Contact />
+      </header>
+
+      <main>
+        <section className="hero-section" id="home">
+          <div className="site-container hero-grid">
+            <div className="hero-copy">
+              <p className="eyebrow">Development & Community Empowerment Organization</p>
+              <h1>Empowering communities, <em>building sustainable futures.</em></h1>
+              <p className="hero-text">Welcome to Higsi Forum. We create educational opportunities, professional training, leadership development, entrepreneurship programs, and community-based initiatives that drive sustainable change.</p>
+              <div className="hero-actions">
+                <a className="button button-primary" href="#programs">Explore our programs <span>↗</span></a>
+                <a className="button button-quiet" href="#about-us">About Higsi Forum</a>
+              </div>
+              <div className="hero-note"><span className="note-line" /> Rooted in people. Designed for lasting impact.</div>
+            </div>
+            <div className="hero-visual" aria-label="Higsi Forum community development illustration">
+              <div className="visual-orbit orbit-one" /><div className="visual-orbit orbit-two" />
+              <div className="visual-card visual-main"><span>H</span><strong>People first.</strong><small>Progress together.</small></div>
+              <div className="visual-card visual-stat"><strong>7</strong><small>focus areas</small></div>
+              <div className="visual-card visual-quote">“Change begins when people have the opportunity to lead it.”</div>
+            </div>
+          </div>
+          <div className="site-container focus-strip"><span>Our focus</span>{focusAreas.map((area) => <span key={area}>{area}</span>)}</div>
+        </section>
+
+        <section className="section about-section" id="about-us">
+          <div className="site-container about-grid">
+            <div><p className="eyebrow">01 / About us</p><h2>Knowledge becomes powerful when communities can use it.</h2></div>
+            <div className="about-body"><p className="lead">Higsi Forum is a development and community empowerment organization working to create educational opportunities, skills development, leadership enhancement, and support for community initiatives.</p><p>We believe a progressive society requires individuals equipped with knowledge, skills, confidence, creativity, and the power to make impactful decisions.</p><div className="principles"><div><strong>Our vision</strong><p>A skilled, empowered, resilient, and inclusive society where individuals and communities build sustainable futures.</p></div><div><strong>Our mission</strong><p>To empower communities through inclusive education, capacity building, innovation, leadership, and sustainable initiatives.</p></div></div></div>
+          </div>
+          <div className="site-container founder-row"><div className="founder-avatar">N</div><div><p className="eyebrow">Leadership profile</p><h3>Nadiira Abdirisak Jama <span>Founder & Chairperson</span></h3><p>With a background in Educational Management and Planning, Nadiira brings experience in education, training, capacity building, youth and women empowerment, leadership, and community development.</p></div></div>
+        </section>
+
+        <section className="section programs-section" id="programs"><div className="site-container"><div className="section-heading"><div><p className="eyebrow">02 / Programs</p><h2>Practical programs.<br /><em>Meaningful progress.</em></h2></div><p>Our programs respond to real community needs with learning that is relevant, inclusive, and designed to move people from possibility to action.</p></div><div className="program-grid">{programs.map((program) => <article className="program-card" key={program.number}><span className="program-number">{program.number}</span><h3>{program.title}</h3><p>{program.text}</p><small>{program.tags}</small></article>)}</div></div></section>
+
+        <section className="impact-section" id="our-impact"><div className="site-container"><div className="section-heading impact-heading"><div><p className="eyebrow">03 / Our impact</p><h2>Creating opportunities.<br /><em>Building capacity.<br />Inspiring change.</em></h2></div><p>Higsi Forum does not just provide training; we create opportunities that help people learn, grow, connect, build ideas, and turn them into action.</p></div><div className="impact-grid">{impactItems.map(([metric, label]) => <div className="impact-item" key={label}><strong>{metric}</strong><span>{label}</span></div>)}</div></div></section>
+
+        <section className="section partnership-section" id="partnerships"><div className="site-container partnership-grid"><div><p className="eyebrow">04 / Partnerships</p><h2>Let’s build the next chapter <em>together.</em></h2><p className="lead">Higsi Forum welcomes partnerships with NGOs, development organizations, government institutions, universities, private-sector organizations, donors, and community stakeholders committed to meaningful impact.</p><a className="button button-primary" href="#contact-us">Partner with Higsi Forum <span>↗</span></a></div><div className="collaboration-list"><p>Collaboration areas</p>{collaborationAreas.map((area) => <div key={area}><span>✓</span>{area}</div>)}</div></div></section>
+
+        <section className="section contact-section" id="contact-us"><div className="site-container contact-grid"><div><p className="eyebrow">05 / Contact us</p><h2>Have an idea?<br /><em>Let’s talk.</em></h2><p className="lead">Have a project idea, partnership opportunity, training request, or question? We would be happy to hear from you.</p><div className="contact-details"><p><small>Email</small><a href="mailto:info@higsiforum.org">info@higsiforum.org</a></p><p><small>Phone</small><span>+252 [Phone Number]</span></p><p><small>Location</small><span>Dhaka / Office Location</span></p></div></div><form className="contact-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}><div className="form-row"><label>Full name<input required placeholder="Your name" /></label><label>Organization<input placeholder="Organization name" /></label></div><div className="form-row"><label>Email address<input required type="email" placeholder="you@example.com" /></label><label>Phone number<input placeholder="+252 ..." /></label></div><label>Subject<input required placeholder="How can we collaborate?" /></label><label>Message<textarea required rows="5" placeholder="Tell us a little about your idea..." /></label><button className="button button-primary" type="submit">{submitted ? "Message ready to send" : "Send message"} <span>↗</span></button></form></div></section>
+      </main>
+
+      <footer className="site-footer"><div className="site-container footer-grid"><div><a className="brand" href="#home"><span className="brand-mark">H</span><span><strong>Higsi</strong> Forum</span></a><p>Empowering communities,<br />building sustainable futures.</p></div><div><p className="footer-label">Explore</p><a href="#about-us">About us</a><a href="#programs">Programs</a><a href="#our-impact">Our impact</a><a href="#partnerships">Partnerships</a></div><div><p className="footer-label">Focus areas</p><span>Youth · Women · Education</span><span>Skills · Leadership · Community</span></div></div><div className="site-container footer-bottom"><span>© 2026 Higsi Forum. All rights reserved.</span><span>Development & Community Empowerment Organization</span></div></footer>
     </div>
   );
 };

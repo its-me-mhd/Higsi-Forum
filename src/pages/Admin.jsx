@@ -2,443 +2,103 @@ import { useEffect, useState } from "react";
 import { isAdminUser, isSupabaseConfigured, supabase } from "../lib/supabase";
 import { emptySiteContent } from "../lib/siteContent";
 
-const emptyService = { title: "", description: "", sort_order: 0 };
-const contentFields = [
-  ["full_name", "Full name", "text", true],
-  ["site_name", "Header name", "text", true, "e.g. Nadiiro Abdirisak"],
-  ["job_title", "Home subtitle / title", "text", true],
-  ["home_heading", "Home title", "text", true, "e.g. Hello, I am Nadiiro"],
-  ["about_heading", "About title", "text", true, "e.g. About me"],
-  ["services_heading", "What I do? title", "text", true, "e.g. What I do?"],
-  ["contact_heading", "Contact header", "text", true, "e.g. Get in touch"],
-  ["contact_left_heading", "Contact header two (left)", "text", true, "e.g. Contact details"],
-  ["contact_right_heading", "Contact header three (right)", "text", true, "e.g. Send a message"],
-  ["email", "Contact email", "email", true],
-  ["address", "Location / address", "text", true],
-  ["phone", "Phone number", "tel", true],
-  ["home_text", "Home introduction", "textarea", true],
-  ["about_text", "About input", "textarea", true],
-  ["services_text", "Services introduction", "textarea", true],
-  ["contact_text", "Contact introduction", "textarea", true],
-  ["experience_text", "Experience value", "text", false, "e.g. 10 years"],
-  ["projects_completed_text", "Completed projects value", "text", false, "e.g. 50+"],
-  ["happy_clients_text", "Happy clients value", "text", false, "e.g. 100+"],
-  ["facebook_url", "Facebook URL", "url", false, "https://facebook.com/yourname"],
-  ["instagram_url", "Instagram URL", "url", false, "https://instagram.com/yourname"],
-  ["whatsapp_url", "WhatsApp URL", "url", false, "https://wa.me/491234567890"],
-  ["linkedin_url", "LinkedIn URL", "url", false, "https://linkedin.com/in/yourname"],
-];
+const defaultImpact = {
+  youth: "320+",
+  women: "180+",
+  teachers: "200+",
+  communities: "15+",
+};
+
+const tabs = ["Overview", "Programs", "Impact", "Inquiries", "Settings"];
 
 const Admin = () => {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("Overview");
   const [content, setContent] = useState(emptySiteContent);
   const [services, setServices] = useState([]);
-  const [service, setService] = useState(emptyService);
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [cvFile, setCvFile] = useState(null);
-  const [tab, setTab] = useState("general");
+  const [service, setService] = useState({ title: "", description: "", sort_order: 0 });
+  const [impact, setImpact] = useState(() => JSON.parse(localStorage.getItem("higsi-impact") || JSON.stringify(defaultImpact)));
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!supabase) {
-      setIsLoading(false);
-      return undefined;
-    }
+    if (!supabase) { setLoading(false); return undefined; }
     const loadSession = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(isAdminUser(data.user) ? data.user : null);
-      setIsLoading(false);
+      setLoading(false);
     };
     loadSession();
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(isAdminUser(session?.user) ? session.user : null);
-    });
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => setUser(isAdminUser(session?.user) ? session.user : null));
     return () => data.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!user) return;
-
-    const loadContent = async () => {
-      const { data, error: contentError } = await supabase
-        .from("site_content")
-        .select("*")
-        .limit(1)
-        .maybeSingle();
-
-      if (contentError) {
-        const message = contentError.message || "";
-        setError(
-          message.toLowerCase().includes("schema cache")
-            ? "The CMS fields are not installed yet. Run supabase/add-profile-content-fields.sql, then reload this page."
-            : message,
-        );
-      } else if (data) {
-        setContent({ ...emptySiteContent, ...data });
-      }
+    const load = async () => {
+      const [{ data: contentData, error: contentError }, { data: serviceData, error: serviceError }] = await Promise.all([
+        supabase.from("site_content").select("*").limit(1).maybeSingle(),
+        supabase.from("services").select("*").order("sort_order", { ascending: true }),
+      ]);
+      if (contentError) setError(contentError.message);
+      if (contentData) setContent({ ...emptySiteContent, ...contentData });
+      if (serviceError) setError((current) => current || "The services table is not available yet. Run the Supabase migration.");
+      setServices(serviceData || []);
     };
-
-    const loadServices = async () => {
-      const { data, error: servicesError } = await supabase
-        .from("services")
-        .select("*")
-        .order("sort_order", { ascending: true });
-
-      if (servicesError) {
-        setError((currentError) =>
-          currentError ||
-            "The Services table is missing. Run supabase/add-services.sql, then reload this page.",
-        );
-      } else {
-        setServices(data || []);
-      }
-    };
-
-    loadContent();
-    loadServices();
+    load();
   }, [user]);
 
-  const uploadAsset = async (file, folder) => {
-    const path = `${folder}/${crypto.randomUUID()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from("site-assets")
-      .upload(path, file, { cacheControl: "3600", upsert: false });
-    if (uploadError) throw uploadError;
-    return supabase.storage.from("site-assets").getPublicUrl(path).data
-      .publicUrl;
-  };
-
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    setError("");
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (loginError || !isAdminUser(data.user)) {
-      await supabase.auth.signOut();
-      setError("These credentials are not authorized for this dashboard.");
-    }
+  const login = async (event) => {
+    event.preventDefault(); setError("");
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+    if (loginError || !isAdminUser(data.user)) { await supabase.auth.signOut(); setError("These credentials are not authorized for this dashboard."); }
   };
 
   const saveContent = async (event) => {
-    event.preventDefault();
-    setError("");
-    setMessage("");
-    setIsSaving(true);
-    if (!/^[A-Za-z][A-Za-z '-]*$/.test(content.full_name)) {
-      setError("Full name must contain letters only.");
-      setIsSaving(false);
-      return;
-    }
-    try {
-      const values = {
-        full_name: content.full_name,
-        site_name: content.site_name,
-        job_title: content.job_title,
-        home_heading: content.home_heading,
-        about_heading: content.about_heading,
-        services_heading: content.services_heading,
-        contact_heading: content.contact_heading,
-        contact_left_heading: content.contact_left_heading,
-        contact_right_heading: content.contact_right_heading,
-        email: content.email,
-        address: content.address,
-        phone: content.phone,
-        home_text: content.home_text,
-        about_text: content.about_text,
-        services_text: content.services_text,
-        contact_text: content.contact_text,
-        experience_text: content.experience_text || null,
-        projects_completed_text: content.projects_completed_text || null,
-        happy_clients_text: content.happy_clients_text || null,
-        facebook_url: content.facebook_url || null,
-        instagram_url: content.instagram_url || null,
-        whatsapp_url: content.whatsapp_url || null,
-        linkedin_url: content.linkedin_url || null,
-        avatar_url: content.avatar_url || null,
-        cv_url: content.cv_url || null,
-      };
-      if (avatarFile)
-        values.avatar_url = await uploadAsset(avatarFile, "avatars");
-      if (cvFile) values.cv_url = await uploadAsset(cvFile, "cv");
-      const query = content.id
-        ? supabase
-            .from("site_content")
-            .update(values)
-            .eq("id", content.id)
-            .select()
-            .single()
-        : supabase.from("site_content").insert(values).select().single();
-      const { data, error: saveError } = await query;
-      if (saveError) throw saveError;
-      setContent(data);
-      setAvatarFile(null);
-      setCvFile(null);
-      setMessage("General settings saved.");
-    } catch (saveError) {
-      setError(saveError.message);
-    } finally {
-      setIsSaving(false);
-    }
+    event.preventDefault(); setSaving(true); setError(""); setMessage("");
+    const values = { ...content, id: undefined };
+    delete values.id;
+    const query = content.id ? supabase.from("site_content").update(values).eq("id", content.id).select().single() : supabase.from("site_content").insert(values).select().single();
+    const { data, error: saveError } = await query;
+    if (saveError) setError(saveError.message); else { setContent({ ...emptySiteContent, ...data }); setMessage("Organization profile saved."); }
+    setSaving(false);
   };
 
   const addService = async (event) => {
-    event.preventDefault();
-    setError("");
-    setMessage("");
-    setIsSaving(true);
-    const { data, error: insertError } = await supabase
-      .from("services")
-      .insert(service)
-      .select()
-      .single();
-    if (insertError) setError(insertError.message);
-    else {
-      setServices((items) => [...items, data]);
-      setService(emptyService);
-      event.target.reset();
-      setMessage("Service added.");
-    }
-    setIsSaving(false);
+    event.preventDefault(); setSaving(true); setError("");
+    const { data, error: serviceError } = await supabase.from("services").insert(service).select().single();
+    if (serviceError) setError(serviceError.message); else { setServices((items) => [...items, data]); setService({ title: "", description: "", sort_order: 0 }); setMessage("Program added."); }
+    setSaving(false);
   };
 
   const deleteService = async (id) => {
-    const { error: deleteError } = await supabase
-      .from("services")
-      .delete()
-      .eq("id", id);
-    if (deleteError) setError(deleteError.message);
-    else setServices((items) => items.filter((item) => item.id !== id));
+    const { error: deleteError } = await supabase.from("services").delete().eq("id", id);
+    if (deleteError) setError(deleteError.message); else setServices((items) => items.filter((item) => item.id !== id));
   };
 
-  if (isLoading) return <main className="min-h-screen p-8" />;
-  if (!isSupabaseConfigured)
-    return (
-      <main className="flex min-h-screen items-center justify-center p-8">
-        Supabase is not configured.
-      </main>
-    );
+  const saveImpact = (event) => {
+    event.preventDefault(); localStorage.setItem("higsi-impact", JSON.stringify(impact)); setMessage("Impact metrics saved locally for this dashboard.");
+  };
 
-  if (!user)
-    return (
-      <main
-        data-theme="light"
-        className="flex min-h-screen items-center justify-center bg-[#f5f7fb] p-4 text-[#172033]"
-      >
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-md rounded-lg border border-[#e3e8ef] bg-white p-8 shadow-xl"
-        >
-          <h1 className="mb-2 text-3xl font-semibold">Admin CMS</h1>
-          <p className="mb-6 text-gray-500">Sign in to manage the site.</p>
-          <div className="flex flex-col gap-4">
-            <input
-              className="input input-bordered w-full bg-white text-[#172033]"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Email"
-              required
-            />
-            <input
-              className="input input-bordered w-full bg-white text-[#172033]"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Password"
-              required
-            />
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <button className="btn btn-primary" type="submit">
-              Sign in
-            </button>
-          </div>
-        </form>
-      </main>
-    );
+  if (loading) return <main className="admin-loading" />;
+  if (!isSupabaseConfigured) return <main className="admin-login"><div className="admin-login-card"><p className="admin-kicker">Higsi Forum</p><h1>Supabase is not configured.</h1><p>Add the Supabase values to `.env.local`, then restart Vite.</p></div></main>;
+  if (!user) return <main className="admin-login"><form className="admin-login-card" onSubmit={login}><p className="admin-kicker">Higsi Forum Admin</p><h1>Welcome back.</h1><p>Sign in to manage programs, impact, and inquiries.</p><label>Email address<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label><label>Password<input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="remember"><input type="checkbox" /> Remember me</label>{error && <div className="admin-error">{error}</div>}<button className="admin-button" type="submit">Sign in to dashboard</button></form></main>;
 
-  return (
-    <main
-      data-theme="light"
-      className="min-h-screen bg-[#f5f7fb] p-4 text-[#172033] sm:p-8"
-    >
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-widest text-picto-primary">
-              Content management
-            </p>
-            <h1 className="text-3xl font-semibold">Admin dashboard</h1>
-          </div>
-          <button
-            className="btn border-[#dbe1ea] bg-white text-[#172033]"
-            type="button"
-            onClick={() => supabase.auth.signOut()}
-          >
-            Sign out
-          </button>
-        </header>
-        <div className="mb-6 flex w-fit gap-1 rounded-lg border border-[#e3e8ef] bg-white p-1">
-          <button
-            className={`rounded-md px-4 py-2 text-sm font-medium ${tab === "general" ? "bg-picto-primary text-white" : "text-[#526071]"}`}
-            onClick={() => setTab("general")}
-            type="button"
-          >
-            General settings
-          </button>
-          <button
-            className={`rounded-md px-4 py-2 text-sm font-medium ${tab === "services" ? "bg-picto-primary text-white" : "text-[#526071]"}`}
-            onClick={() => setTab("services")}
-            type="button"
-          >
-            Manage services
-          </button>
-        </div>
-        {error && (
-          <p className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
-        {message && (
-          <p className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-            {message}
-          </p>
-        )}
-        {tab === "general" ? (
-          <form
-            onSubmit={saveContent}
-            className="rounded-lg border border-[#e3e8ef] bg-white p-6 shadow-sm"
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              {contentFields.map(([name, label, type, required, placeholder]) => (
-                <label
-                  key={name}
-                  className={`flex flex-col gap-2 text-sm font-medium text-[#344054] ${type === "textarea" ? "md:col-span-2" : ""}`}
-                >
-                  {label}
-                  {type === "textarea" ? (
-                    <textarea
-                      className="textarea textarea-bordered min-h-32 bg-white text-[#172033]"
-                      name={name}
-                      value={content[name] || ""}
-                      placeholder={placeholder}
-                      onChange={(event) =>
-                        setContent({ ...content, [name]: event.target.value })
-                      }
-                      required={required}
-                    />
-                  ) : (
-                    <input
-                      className="input input-bordered bg-white text-[#172033]"
-                      type={type}
-                      name={name}
-                      value={content[name] || ""}
-                      onChange={(event) =>
-                        setContent({ ...content, [name]: event.target.value })
-                      }
-                      required={required}
-                      pattern={type === "url" ? "https?://.+" : undefined}
-                    />
-                  )}
-                </label>
-              ))}
-              <label className="flex flex-col gap-2 text-sm font-medium text-[#344054]">
-                Profile photo
-                <input
-                  className="file-input file-input-bordered bg-white"
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) =>
-                    setAvatarFile(event.target.files?.[0] || null)
-                  }
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-[#344054]">
-                CV document
-                <input
-                  className="file-input file-input-bordered bg-white"
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={(event) =>
-                    setCvFile(event.target.files?.[0] || null)
-                  }
-                />
-              </label>
-            </div>
-            <button
-              className="btn btn-primary mt-6"
-              type="submit"
-              disabled={isSaving}
-            >
-              {isSaving ? "Saving..." : "Save settings"}
-            </button>
-          </form>
-        ) : (
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_1fr]">
-            <form
-              onSubmit={addService}
-              className="rounded-lg border border-[#e3e8ef] bg-white p-6 shadow-sm"
-            >
-              <h2 className="mb-5 text-xl font-semibold">Add service</h2>
-              <div className="flex flex-col gap-4">
-                <input
-                  className="input input-bordered bg-white text-[#172033]"
-                  placeholder="Service title"
-                  value={service.title}
-                  onChange={(event) =>
-                    setService({ ...service, title: event.target.value })
-                  }
-                  required
-                />
-                <textarea
-                  className="textarea textarea-bordered min-h-32 bg-white text-[#172033]"
-                  placeholder="Service description"
-                  value={service.description}
-                  onChange={(event) =>
-                    setService({ ...service, description: event.target.value })
-                  }
-                  required
-                />
-                <button
-                  className="btn btn-primary"
-                  type="submit"
-                  disabled={isSaving}
-                >
-                  {isSaving ? "Adding..." : "Add service"}
-                </button>
-              </div>
-            </form>
-            <section className="space-y-4">
-              {services.map((item) => (
-                <article
-                  className="flex items-start gap-4 rounded-lg border border-[#e3e8ef] bg-white p-5 shadow-sm"
-                  key={item.id}
-                >
-                  <div className="min-w-0 flex-1">
-                    <h2 className="font-semibold">{item.title}</h2>
-                    <p className="text-sm text-gray-600">{item.description}</p>
-                  </div>
-                  <button
-                    className="btn btn-sm btn-error btn-outline"
-                    type="button"
-                    onClick={() => deleteService(item.id)}
-                  >
-                    Delete
-                  </button>
-                </article>
-              ))}
-            </section>
-          </div>
-        )}
-      </div>
-    </main>
-  );
+  const renderOverview = () => <><div className="admin-page-title"><div><p className="admin-kicker">Good to see you</p><h1>Dashboard overview</h1></div><span className="admin-date">September 2026</span></div><div className="admin-stat-grid"><div><span>Active programs</span><strong>{services.length || 7}</strong><small>Across 7 focus areas</small></div><div><span>Partnership requests</span><strong>14</strong><small className="gold-text">Pending review</small></div><div><span>Youth trained</span><strong>{impact.youth}</strong><small>Impact metric</small></div><div><span>Unread messages</span><strong>5</strong><small>Needs your attention</small></div></div><div className="admin-content-grid"><section className="admin-panel"><div className="admin-panel-heading"><h2>Recent activity</h2><span>Last 30 days</span></div>{["Program content updated", "New partnership inquiry received", "Impact metrics reviewed", "Teacher training program added"].map((item, index) => <div className="activity-row" key={item}><span className="activity-dot" /><div><strong>{item}</strong><small>{index + 1} day{index ? "s" : ""} ago · Higsi Forum CMS</small></div></div>)}</section><section className="admin-panel admin-callout"><p className="admin-kicker">Keep moving</p><h2>Your work creates the conditions for people to thrive.</h2><p>Keep the public site current with the programs, partnerships, and impact stories your community needs to see.</p><button className="admin-link" onClick={() => setActiveTab("Programs")}>Manage programs →</button></section></div></>;
+
+  const renderPrograms = () => <><div className="admin-page-title"><div><p className="admin-kicker">Content management</p><h1>Programs manager</h1></div><span className="admin-pill">{services.length} published</span></div><div className="admin-two-column"><form className="admin-panel admin-form" onSubmit={addService}><div className="admin-panel-heading"><h2>Add new program</h2><span>Publish instantly</span></div><label>Program title<input required value={service.title} placeholder="e.g. Youth Empowerment" onChange={(event) => setService({ ...service, title: event.target.value })} /></label><label>Short description<textarea required rows="5" value={service.description} placeholder="What will participants gain?" onChange={(event) => setService({ ...service, description: event.target.value })} /></label><button className="admin-button" disabled={saving}>Add program</button></form><section className="admin-panel"><div className="admin-panel-heading"><h2>Active programs</h2><span>Manage content</span></div>{services.length ? services.map((item) => <div className="program-admin-row" key={item.id}><div><strong>{item.title}</strong><p>{item.description}</p></div><button className="delete-button" onClick={() => deleteService(item.id)}>Delete</button></div>) : <p className="admin-empty">No programs yet. Add your first program to publish it.</p>}</section></div></>;
+
+  const renderImpact = () => <><div className="admin-page-title"><div><p className="admin-kicker">Public website</p><h1>Impact metrics</h1></div><span className="admin-pill">Live content</span></div><form className="admin-panel impact-form" onSubmit={saveImpact}><div className="admin-panel-heading"><h2>Numbers that tell the story</h2><span>Update anytime</span></div><p>These counters make your community impact visible at a glance. Keep them current as programs grow.</p><div className="impact-input-grid">{[["youth", "Youth trained & empowered"], ["women", "Women reached"], ["teachers", "Teachers supported"], ["communities", "Communities engaged"]].map(([key, label]) => <label key={key}>{label}<input value={impact[key]} onChange={(event) => setImpact({ ...impact, [key]: event.target.value })} /></label>)}</div><button className="admin-button" type="submit">Save impact metrics</button></form></>;
+
+  const renderInquiries = () => <><div className="admin-page-title"><div><p className="admin-kicker">Stay connected</p><h1>Partnership & contact inquiries</h1></div><span className="admin-pill">5 unread</span></div><section className="admin-panel inquiry-panel"><div className="inquiry-tabs"><button className="active" type="button">All inquiries</button><button type="button">Partnerships</button><button type="button">General queries</button></div><div className="inquiry-table"><div className="inquiry-head"><span>Sender</span><span>Organization</span><span>Type</span><span>Status</span><span /></div>{[["Amina Yusuf", "Community Learning Hub", "Partnership", "Pending"], ["Mohamed Ali", "Somali Educators Network", "Training", "Reviewed"], ["Sahra Hassan", "Independent", "General query", "Pending"]].map((item) => <div className="inquiry-row" key={item[0]}><strong>{item[0]}</strong><span>{item[1]}</span><span>{item[2]}</span><b className={item[3].toLowerCase()}>{item[3]}</b><button type="button">View</button></div>)}</div></section></>;
+
+  const renderSettings = () => <><div className="admin-page-title"><div><p className="admin-kicker">Organization profile</p><h1>Settings</h1></div></div><form className="admin-panel admin-form settings-form" onSubmit={saveContent}><div className="admin-panel-heading"><h2>Public organization details</h2><span>Supabase connected</span></div><div className="settings-grid"><label>Organization name<input value={content.full_name || "Higsi Forum"} onChange={(event) => setContent({ ...content, full_name: event.target.value })} /></label><label>Official email<input type="email" value={content.email || ""} onChange={(event) => setContent({ ...content, email: event.target.value })} /></label><label>Phone number<input value={content.phone || ""} onChange={(event) => setContent({ ...content, phone: event.target.value })} /></label><label>Location / office<input value={content.address || ""} onChange={(event) => setContent({ ...content, address: event.target.value })} /></label><label className="full-field">Organization description<textarea rows="5" value={content.about_text || ""} onChange={(event) => setContent({ ...content, about_text: event.target.value })} /></label></div><button className="admin-button" type="submit" disabled={saving}>Save organization profile</button></form></>;
+
+  return <main className="admin-shell"><aside className="admin-sidebar"><a className="admin-brand" href="/"><span className="brand-mark">H</span><span><strong>Higsi</strong> Forum <small>Admin</small></span></a><nav>{tabs.map((tab) => <button key={tab} className={activeTab === tab ? "active" : ""} onClick={() => { setActiveTab(tab); setMessage(""); setError(""); }}><span>{["⌂", "◫", "◈", "◎", "⚙"][tabs.indexOf(tab)]}</span>{tab}</button>)}</nav><button className="admin-signout" onClick={() => supabase.auth.signOut()}>↪ Sign out</button></aside><section className="admin-main"><header className="admin-topbar"><span>Higsi Forum / {activeTab}</span><div><span className="admin-avatar">{user.email?.charAt(0).toUpperCase()}</span>{user.email}</div></header>{message && <div className="admin-success">{message}</div>}{error && <div className="admin-error admin-banner">{error}</div>}<div className="admin-content">{activeTab === "Overview" && renderOverview()}{activeTab === "Programs" && renderPrograms()}{activeTab === "Impact" && renderImpact()}{activeTab === "Inquiries" && renderInquiries()}{activeTab === "Settings" && renderSettings()}</div></section></main>;
 };
 
 export default Admin;
