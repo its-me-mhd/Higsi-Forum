@@ -82,12 +82,13 @@ const Home = () => {
 
   const handleContactSubmit = async (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     setIsSending(true);
     setSubmitted(false);
     setSendError("");
 
     try {
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
       const templateParams = Object.fromEntries(formData.entries());
       templateParams.to_email = import.meta.env.VITE_ADMIN_EMAIL;
       templateParams.user_name = templateParams.from_name;
@@ -100,7 +101,7 @@ const Home = () => {
         templateParams,
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
       );
-      event.currentTarget.reset();
+      form.reset();
       setSubmitted(true);
     } catch (error) {
       const errorText = [
