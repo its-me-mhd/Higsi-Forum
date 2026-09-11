@@ -31,9 +31,6 @@ const Profession = () => {
           <p className="text-xs sm:text-lg font-normal text-gray-400 mb-4">
             {content.services_text}
           </p>
-          <p className="text-xs sm:text-lg font-normal text-gray-400">
-            {content.about_text}
-          </p>
         </div>
         <a
           href="#contact"
@@ -43,7 +40,7 @@ const Profession = () => {
           Contact me
         </a>
       </div>
-      <div className="max-h-[52rem] overflow-y-auto pe-3">
+      <div className="max-h-[36rem] overflow-y-auto overscroll-contain pe-3">
         {services.map((service) => (
           <Roles role={service} key={service.id} />
         ))}

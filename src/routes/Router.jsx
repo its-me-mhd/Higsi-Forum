@@ -6,6 +6,7 @@ const Main = lazy(() => import("../layouts/Main"));
 const Admin = lazy(() => import("../pages/Admin"));
 
 const repoName = import.meta.env.VITE_REPO_NAME || "";
+const basename = import.meta.env.PROD && repoName ? `/${repoName}` : "";
 
 export const router = createBrowserRouter(
   [
@@ -26,11 +27,11 @@ export const router = createBrowserRouter(
       ),
       children: [
         {
-          path: "/",
+          index: true,
           element: <Home></Home>,
         },
       ],
     },
   ],
-  { basename: `/${repoName}` },
+  { basename },
 );

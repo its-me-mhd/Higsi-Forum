@@ -46,9 +46,7 @@ export const useSiteContent = () => {
     const fetchContent = async () => {
       const { data, error: fetchError } = await supabase
         .from("site_content")
-        .select(
-          "id, full_name, job_title, site_name, home_heading, about_heading, services_heading, contact_heading, contact_left_heading, contact_right_heading, home_text, about_text, bio_text, avatar_url, cv_url, email, address, phone, linkedin_url, facebook_url, instagram_url, whatsapp_url, services_text, contact_text, experience_text, projects_completed_text, happy_clients_text",
-        )
+        .select("*")
         .limit(1)
         .maybeSingle();
 
@@ -74,7 +72,7 @@ export const useSiteContent = () => {
         return;
       }
 
-      setContent(data);
+      setContent({ ...emptySiteContent, ...data });
       setIsLoading(false);
     };
 

@@ -20,13 +20,13 @@ const Contact = () => {
         id="contact"
       >
         <h2 className="mb-8 text-center text-3xl font-semibold text-[#132238] md:text-4xl">
-          {content.contact_heading || content.contact_left_heading || content.job_title}
+          {content.contact_heading || "Contact"}
         </h2>
         <div className="flex flex-col-reverse lg:gap-5 xl:gap-25.75 lg:flex-row justify-between">
           <div>
             <div>
               <p className="text-[35px] max-lg:hidden font-semibold text-nowrap text-[#132238]">
-                {content.contact_left_heading || content.contact_heading || content.job_title}
+                {content.contact_left_heading || "Contact details"}
               </p>
               <p className="text-[12px] xs:text-[14px] sm:text-lg md:text-lg max-lg:text-center pt-4 font-normal text-soft-dark">
                 {content.contact_text}
@@ -60,8 +60,8 @@ const Contact = () => {
             </div>
           </div>
           <div className="w-full overflow-y-scroll py-6.5">
-            <p className="text-xl mb-2 xs:text-2xl sm:text-2xl md:text-[38px] font-semibold text-[#132238] lg:hidden text-center">
-              {content.contact_right_heading || content.contact_heading || content.job_title}
+            <p className="text-xl mb-2 xs:text-2xl sm:text-2xl md:text-[38px] font-semibold text-[#132238] text-center lg:text-start">
+              {content.contact_right_heading || "Send a message"}
             </p>
             <Form content={content} />
           </div>

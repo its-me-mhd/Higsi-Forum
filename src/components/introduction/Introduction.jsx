@@ -36,6 +36,9 @@ const Introduction = () => {
           <p className="text-3xl xxs:text-4xl sm:max-xl:text-5xl xl:text-6xl font-semibold w-full">
             {content.home_heading || content.full_name}
           </p>
+          <p className="mt-3 text-xl font-medium text-picto-primary sm:text-2xl">
+            {content.job_title}
+          </p>
           <p className="text-xs xxs:text-lg lg:text-[18px] my-6">
             {content.home_text}
           </p>

@@ -5,19 +5,19 @@ import { emptySiteContent } from "../lib/siteContent";
 const emptyService = { title: "", description: "", sort_order: 0 };
 const contentFields = [
   ["full_name", "Full name", "text", true],
-  ["site_name", "Header / site name", "text", true, "e.g. Nadiiro Abdirisak"],
-  ["job_title", "Job title", "text", true],
-  ["home_heading", "Home heading", "text", true, "e.g. Hello, I am Nadiiro"],
-  ["about_heading", "About heading", "text", true, "e.g. About me"],
-  ["services_heading", "Services heading", "text", true, "e.g. What I do?"],
+  ["site_name", "Header name", "text", true, "e.g. Nadiiro Abdirisak"],
+  ["job_title", "Home subtitle / title", "text", true],
+  ["home_heading", "Home title", "text", true, "e.g. Hello, I am Nadiiro"],
+  ["about_heading", "About title", "text", true, "e.g. About me"],
+  ["services_heading", "What I do? title", "text", true, "e.g. What I do?"],
   ["contact_heading", "Contact header", "text", true, "e.g. Get in touch"],
-  ["contact_left_heading", "Contact left heading", "text", true, "e.g. Contact details"],
-  ["contact_right_heading", "Contact right heading", "text", true, "e.g. Send a message"],
+  ["contact_left_heading", "Contact header two (left)", "text", true, "e.g. Contact details"],
+  ["contact_right_heading", "Contact header three (right)", "text", true, "e.g. Send a message"],
   ["email", "Contact email", "email", true],
   ["address", "Location / address", "text", true],
   ["phone", "Phone number", "tel", true],
   ["home_text", "Home introduction", "textarea", true],
-  ["about_text", "About text", "textarea", true],
+  ["about_text", "About input", "textarea", true],
   ["services_text", "Services introduction", "textarea", true],
   ["contact_text", "Contact introduction", "textarea", true],
   ["experience_text", "Experience value", "text", false, "e.g. 10 years"],
@@ -63,28 +63,44 @@ const Admin = () => {
 
   useEffect(() => {
     if (!user) return;
-    Promise.all([
-      supabase.from("site_content").select("*").limit(1).maybeSingle(),
-      supabase
+
+    const loadContent = async () => {
+      const { data, error: contentError } = await supabase
+        .from("site_content")
+        .select("*")
+        .limit(1)
+        .maybeSingle();
+
+      if (contentError) {
+        const message = contentError.message || "";
+        setError(
+          message.toLowerCase().includes("schema cache")
+            ? "The CMS fields are not installed yet. Run supabase/add-profile-content-fields.sql, then reload this page."
+            : message,
+        );
+      } else if (data) {
+        setContent({ ...emptySiteContent, ...data });
+      }
+    };
+
+    const loadServices = async () => {
+      const { data, error: servicesError } = await supabase
         .from("services")
         .select("*")
-        .order("sort_order", { ascending: true }),
-    ]).then(([contentResult, servicesResult]) => {
-      const databaseError = contentResult.error || servicesResult.error;
-      if (databaseError) {
-        const message = databaseError.message || "";
-        setError(
-          message.toLowerCase().includes("services")
-            ? "The Services table is missing. Run supabase/add-services.sql, then reload this page."
-            : message.toLowerCase().includes("schema cache")
-              ? "The CMS fields are not installed yet. Run supabase/add-profile-content-fields.sql, then reload this page."
-              : message,
+        .order("sort_order", { ascending: true });
+
+      if (servicesError) {
+        setError((currentError) =>
+          currentError ||
+            "The Services table is missing. Run supabase/add-services.sql, then reload this page.",
         );
-        return;
+      } else {
+        setServices(data || []);
       }
-      if (contentResult.data) setContent(contentResult.data);
-      setServices(servicesResult.data || []);
-    });
+    };
+
+    loadContent();
+    loadServices();
   }, [user]);
 
   const uploadAsset = async (file, folder) => {
