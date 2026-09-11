@@ -921,6 +921,7 @@ h2 em,
   font-size: 24px;
   font-weight: 700;
 }
+.founder-image { object-fit: cover; }
 .founder-row .eyebrow {
   margin-bottom: 5px;
 }

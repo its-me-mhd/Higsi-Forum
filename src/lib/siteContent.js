@@ -13,7 +13,7 @@ export const emptySiteContent = {
   avatar_url: "",
   cv_url: "",
   email: "info@higsiforum.org",
-  address: "Dhaka / Office Location",
+  address: "Somalia",
   phone: "+252 [Phone Number]",
   github_url: "",
   linkedin_url: "",
@@ -52,6 +52,7 @@ export const emptySiteContent = {
   founder_role: "Founder & Chairperson",
   founder_bio:
     "With a background in Educational Management and Planning, Nadiira brings experience in education, training, capacity building, youth and women empowerment, leadership, and community development.",
+  founder_image_url: "",
   programs_section_heading: "Practical programs. Meaningful progress.",
   programs_section_text:
     "Our programs respond to real community needs with learning that is relevant, inclusive, and designed to move people from possibility to action.",
@@ -94,6 +95,14 @@ export const useSiteContent = () => {
         .limit(1)
         .maybeSingle();
 
+      const mergeContent = (source) =>
+        Object.fromEntries(
+          Object.entries(emptySiteContent).map(([key, fallback]) => [
+            key,
+            source?.[key] ?? fallback,
+          ]),
+        );
+
       if (fetchError) {
         const { data: legacyData, error: legacyError } = await supabase
           .from("site_content")
@@ -105,18 +114,17 @@ export const useSiteContent = () => {
 
         if (legacyError) setError(fetchError.message);
         else if (legacyData) {
-          setContent({
-            ...emptySiteContent,
+          setContent(mergeContent({
             ...legacyData,
-            home_text: legacyData.bio_text || "",
-            about_text: legacyData.bio_text || "",
-          });
+            home_text: legacyData.bio_text || emptySiteContent.home_text,
+            about_text: legacyData.bio_text || emptySiteContent.about_text,
+          }));
         }
         setIsLoading(false);
         return;
       }
 
-      setContent({ ...emptySiteContent, ...data });
+      setContent(mergeContent(data));
       setIsLoading(false);
     };
 

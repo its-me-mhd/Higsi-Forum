@@ -64,6 +64,7 @@ const contentColumns = [
   "impact_communities",
   "impact_partnerships",
   "impact_items",
+  "founder_image_url",
 ];
 
 const defaultImpactItems = [
@@ -72,6 +73,15 @@ const defaultImpactItems = [
   { metric: "200+", label: "Teachers supported through development" },
   { metric: "15+", label: "Communities engaged in initiatives" },
   { metric: "12", label: "Partnerships with local stakeholders" },
+];
+const defaultPrograms = [
+  ["Youth Empowerment & Skills Development", "Practical pathways to confidence, employability, leadership, communication, entrepreneurship, and career readiness."],
+  ["Women Empowerment", "Inclusive development programs that strengthen personal growth, digital confidence, financial awareness, and business capacity."],
+  ["Teacher Training & Professional Development", "Relevant, classroom-ready learning for educators who want to improve teaching quality and support every learner."],
+  ["Education & Capacity Building", "Workshops and training-of-trainers programs that turn knowledge into capability across institutions and communities."],
+  ["Leadership & Personal Development", "Human-centered development for people ready to lead with self-awareness, resilience, good judgment, and purpose."],
+  ["Community Development", "Locally grounded initiatives that build participation, awareness, resilience, innovation, and shared ownership."],
+  ["Entrepreneurship & Innovation", "A practical space for new ideas, business capacity, and economic opportunities, especially for youth and women."],
 ];
 
 const Admin = () => {
@@ -89,6 +99,7 @@ const Admin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newLogo, setNewLogo] = useState(null);
+  const [newFounderImage, setNewFounderImage] = useState(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -121,7 +132,14 @@ const Admin = () => {
     ]).then(([contentResult, servicesResult]) => {
       if (contentResult.error) setError(contentResult.error.message);
       if (contentResult.data) {
-        setContent({ ...emptySiteContent, ...contentResult.data });
+        setContent(
+          Object.fromEntries(
+            Object.entries(emptySiteContent).map(([key, fallback]) => [
+              key,
+              contentResult.data[key] ?? fallback,
+            ]),
+          ),
+        );
         if (
           Array.isArray(contentResult.data.impact_items) &&
           contentResult.data.impact_items.length
@@ -157,6 +175,13 @@ const Admin = () => {
     return supabase.storage.from("site-assets").getPublicUrl(path).data
       .publicUrl;
   };
+  const uploadFounderImage = async () => {
+    if (!newFounderImage) return content.founder_image_url;
+    const path = `founders/${crypto.randomUUID()}-${newFounderImage.name}`;
+    const { error: uploadError } = await supabase.storage.from("site-assets").upload(path, newFounderImage, { cacheControl: "3600", upsert: false });
+    if (uploadError) throw uploadError;
+    return supabase.storage.from("site-assets").getPublicUrl(path).data.publicUrl;
+  };
 
   const saveContent = async (event) => {
     event.preventDefault();
@@ -165,6 +190,7 @@ const Admin = () => {
     setMessage("");
     try {
       const logoUrl = await uploadLogo();
+      const founderImageUrl = await uploadFounderImage();
       const values = Object.fromEntries(
         contentColumns.map((field) => [
           field,
@@ -172,6 +198,7 @@ const Admin = () => {
         ]),
       );
       values.logo_url = logoUrl || null;
+      values.founder_image_url = founderImageUrl || "";
       const query = content.id
         ? supabase
             .from("site_content")
@@ -184,6 +211,7 @@ const Admin = () => {
       if (saveError) throw saveError;
       setContent({ ...emptySiteContent, ...data });
       setNewLogo(null);
+      setNewFounderImage(null);
       setMessage("Website content saved.");
     } catch (saveError) {
       setError(saveError.message);
@@ -220,6 +248,34 @@ const Admin = () => {
       setServices((items) => items.filter((item) => item.id !== id));
       setMessage("Program removed from the public site.");
     }
+  };
+
+  const restoreDefaultPrograms = async () => {
+    setSaving(true);
+    setError("");
+    const { error: deleteError } = await supabase
+      .from("services")
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000");
+    if (deleteError) setError(deleteError.message);
+    else {
+      const { data, error: insertError } = await supabase
+        .from("services")
+        .insert(defaultPrograms.map(([title, description], sort_order) => ({ title, description, sort_order })))
+        .select()
+        .order("sort_order", { ascending: true });
+      if (insertError) setError(insertError.message);
+      else {
+        setServices(data || []);
+        setMessage("Default programs restored. You can edit them afterward.");
+      }
+    }
+    setSaving(false);
+  };
+
+  const restoreDefaultImpact = () => {
+    setImpactItems(defaultImpactItems.map((item) => ({ ...item })));
+    setMessage("Default impact numbers loaded. Save to publish them.");
   };
 
   const saveImpact = async (event) => {
@@ -387,6 +443,11 @@ const Admin = () => {
               : "No custom logo yet. The default H mark will be used."}
           </small>
         </label>
+        <label className="full-field">
+          Founder profile image
+          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setNewFounderImage(event.target.files?.[0] || null)} />
+          <small>{content.founder_image_url ? "A founder profile image is active. Upload another to replace it." : "No profile image yet. The default initial will be used."}</small>
+        </label>
       </div>
       <button className="admin-button" disabled={saving}>
         {saving ? "Saving..." : "Save website content"}
@@ -401,6 +462,10 @@ const Admin = () => {
           <h1>Programs</h1>
         </div>
         <span className="admin-pill">{services.length} published</span>
+      </div>
+      <div className="content-actions">
+        <button className="admin-link" type="button" onClick={restoreDefaultPrograms} disabled={saving}>Keep the default programs</button>
+        <small>Restores the original program list, then you can remove or add individual programs.</small>
       </div>
       <div className="admin-two-column">
         <form className="admin-panel admin-form" onSubmit={addService}>
@@ -469,6 +534,10 @@ const Admin = () => {
         <span>Shown in section 03</span>
       </div>
       <p>Add, edit, or remove the rows shown in the public Impact section.</p>
+      <div className="content-actions">
+        <button className="admin-link" type="button" onClick={restoreDefaultImpact}>Keep the default impact</button>
+        <small>Loads the original impact rows for review before saving.</small>
+      </div>
       <div className="impact-editor-list">
         {impactItems.map((item, index) => (
           <div className="impact-editor-row" key={`${index}-${item.label}`}>

@@ -258,9 +258,7 @@ const Home = () => {
             </div>
           </div>
           <div className="site-container founder-row">
-            <div className="founder-avatar">
-              {content.founder_name?.charAt(0) || "N"}
-            </div>
+            {content.founder_image_url ? <img className="founder-avatar founder-image" src={content.founder_image_url} alt={content.founder_name} /> : <div className="founder-avatar">{content.founder_name?.charAt(0) || "N"}</div>}
             <div>
               <p className="eyebrow">Leadership profile</p>
               <h3>

@@ -12,6 +12,7 @@ alter table public.site_content
   add column if not exists founder_name text,
   add column if not exists founder_role text,
   add column if not exists founder_bio text,
+  add column if not exists founder_image_url text,
   add column if not exists programs_section_heading text,
   add column if not exists programs_section_text text,
   add column if not exists impact_section_heading text,
