@@ -145,15 +145,7 @@ const Home = () => {
       <header className="site-header">
         <div className="site-container header-inner">
           <a className="brand" href="#home" onClick={() => setMenuOpen(false)}>
-            {content.logo_url ? (
-              <img
-                className="brand-logo"
-                src={content.logo_url}
-                alt="Higsi Forum"
-              />
-            ) : (
-              <span className="brand-mark">H</span>
-            )}
+            <span className="brand-mark">H</span>
             <span>
               <strong>Higsi</strong> Forum
             </span>
@@ -219,14 +211,13 @@ const Home = () => {
             >
               <div className="visual-orbit orbit-one" />
               <div className="visual-orbit orbit-two" />
-              <div className="visual-card visual-main">
+              <div className={`visual-card visual-main ${content.logo_url ? "has-custom-logo" : ""}`}>
                 {content.logo_url ? (
                   <img className="visual-logo" src={content.logo_url} alt="Higsi Forum" />
                 ) : (
                   <span>H</span>
                 )}
-                <strong>People first.</strong>
-                <small>Progress together.</small>
+                {!content.logo_url && <><strong>People first.</strong><small>Progress together.</small></>}
               </div>
               <div className="visual-card visual-stat">
                 <strong>7</strong>
@@ -433,15 +424,7 @@ const Home = () => {
         <div className="site-container footer-grid">
           <div>
             <a className="brand" href="#home">
-              {content.logo_url ? (
-                <img
-                  className="brand-logo"
-                  src={content.logo_url}
-                  alt="Higsi Forum"
-                />
-              ) : (
-                <span className="brand-mark">H</span>
-              )}
+              <span className="brand-mark">H</span>
               <span>
                 <strong>Higsi</strong> Forum
               </span>

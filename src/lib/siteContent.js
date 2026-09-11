@@ -6,8 +6,10 @@ export const emptySiteContent = {
   full_name: "Higsi Forum",
   job_title: "Development & Community Empowerment Organization",
   bio_text: "",
-  home_text: "",
-  about_text: "",
+  home_text:
+    "Welcome to Higsi Forum. We create educational opportunities, professional training, leadership development, entrepreneurship programs, and community-based initiatives that drive sustainable change.",
+  about_text:
+    "Higsi Forum is a development and community empowerment organization working to create educational opportunities, skills development, leadership enhancement, and support for community initiatives.",
   avatar_url: "",
   cv_url: "",
   email: "info@higsiforum.org",
@@ -18,14 +20,16 @@ export const emptySiteContent = {
   facebook_url: "",
   instagram_url: "",
   whatsapp_url: "",
-  services_text: "",
-  contact_text: "",
+  services_text:
+    "Our programs respond to real community needs with learning that is relevant, inclusive, and designed to move people from possibility to action.",
+  contact_text:
+    "Have a project idea, partnership opportunity, training request, or question? We would be happy to hear from you.",
   experience_text: "",
   projects_completed_text: "",
   happy_clients_text: "",
   site_name: "Higsi Forum",
-  home_heading: "",
-  about_heading: "",
+  home_heading: "Empowering communities, building sustainable futures.",
+  about_heading: "Knowledge becomes powerful when communities can use it.",
   services_heading: "What I do?",
   contact_heading: "",
   contact_left_heading: "",

@@ -166,7 +166,10 @@ const Admin = () => {
     try {
       const logoUrl = await uploadLogo();
       const values = Object.fromEntries(
-        contentColumns.map((field) => [field, content[field] || null]),
+        contentColumns.map((field) => [
+          field,
+          content[field] ?? emptySiteContent[field] ?? "",
+        ]),
       );
       values.logo_url = logoUrl || null;
       const query = content.id
