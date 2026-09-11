@@ -90,6 +90,10 @@ const Home = () => {
       const formData = new FormData(event.currentTarget);
       const templateParams = Object.fromEntries(formData.entries());
       templateParams.to_email = import.meta.env.VITE_ADMIN_EMAIL;
+      templateParams.user_name = templateParams.from_name;
+      templateParams.user_email = templateParams.reply_to;
+      templateParams.user_phone = templateParams.phone;
+      templateParams.user_message = templateParams.message;
       await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
@@ -99,7 +103,11 @@ const Home = () => {
       event.currentTarget.reset();
       setSubmitted(true);
     } catch (error) {
-      const errorText = error?.text || "";
+      const errorText = [
+        error?.text,
+        error?.message,
+        error?.status ? `EmailJS status ${error.status}.` : "",
+      ].filter(Boolean).join(" ");
       setSendError(
         errorText.toLowerCase().includes("invalid grant")
           ? "Email delivery is temporarily unavailable. Please reconnect the Gmail account in EmailJS, then try again."
