@@ -1,4 +1,5 @@
 import { useState } from "react";
+import emailjs from "@emailjs/browser";
 
 const focusAreas = [
   "Education",
@@ -76,6 +77,30 @@ const collaborationAreas = [
 const Home = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState("");
+
+  const handleContactSubmit = async (event) => {
+    event.preventDefault();
+    setIsSending(true);
+    setSubmitted(false);
+    setSendError("");
+
+    try {
+      await emailjs.sendForm(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        event.currentTarget,
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+      );
+      event.currentTarget.reset();
+      setSubmitted(true);
+    } catch (error) {
+      setSendError(error?.text || "Your message could not be sent. Please try again.");
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <div className="higsi-site">
@@ -132,7 +157,7 @@ const Home = () => {
 
         <section className="section partnership-section" id="partnerships"><div className="site-container partnership-grid"><div><p className="eyebrow">04 / Partnerships</p><h2>Let’s build the next chapter <em>together.</em></h2><p className="lead">Higsi Forum welcomes partnerships with NGOs, development organizations, government institutions, universities, private-sector organizations, donors, and community stakeholders committed to meaningful impact.</p><a className="button button-primary" href="#contact-us">Partner with Higsi Forum <span>↗</span></a></div><div className="collaboration-list"><p>Collaboration areas</p>{collaborationAreas.map((area) => <div key={area}><span>✓</span>{area}</div>)}</div></div></section>
 
-        <section className="section contact-section" id="contact-us"><div className="site-container contact-grid"><div><p className="eyebrow">05 / Contact us</p><h2>Have an idea?<br /><em>Let’s talk.</em></h2><p className="lead">Have a project idea, partnership opportunity, training request, or question? We would be happy to hear from you.</p><div className="contact-details"><p><small>Email</small><a href="mailto:info@higsiforum.org">info@higsiforum.org</a></p><p><small>Phone</small><span>+252 [Phone Number]</span></p><p><small>Location</small><span>Dhaka / Office Location</span></p></div></div><form className="contact-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(true); }}><div className="form-row"><label>Full name<input required placeholder="Your name" /></label><label>Organization<input placeholder="Organization name" /></label></div><div className="form-row"><label>Email address<input required type="email" placeholder="you@example.com" /></label><label>Phone number<input placeholder="+252 ..." /></label></div><label>Subject<input required placeholder="How can we collaborate?" /></label><label>Message<textarea required rows="5" placeholder="Tell us a little about your idea..." /></label><button className="button button-primary" type="submit">{submitted ? "Message ready to send" : "Send message"} <span>↗</span></button></form></div></section>
+        <section className="section contact-section" id="contact-us"><div className="site-container contact-grid"><div><p className="eyebrow">05 / Contact us</p><h2>Have an idea?<br /><em>Let’s talk.</em></h2><p className="lead">Have a project idea, partnership opportunity, training request, or question? We would be happy to hear from you.</p><div className="contact-details"><p><small>Email</small><a href="mailto:info@higsiforum.org">info@higsiforum.org</a></p><p><small>Phone</small><span>+252 [Phone Number]</span></p><p><small>Location</small><span>Dhaka / Office Location</span></p></div></div><form className="contact-form" onSubmit={handleContactSubmit}><div className="form-row"><label>Full name<input name="from_name" required placeholder="Your name" /></label><label>Organization<input name="organization" placeholder="Organization name" /></label></div><div className="form-row"><label>Email address<input name="reply_to" required type="email" placeholder="you@example.com" /></label><label>Phone number<input name="phone" placeholder="+252 ..." /></label></div><label>Subject<input name="subject" required placeholder="How can we collaborate?" /></label><label>Message<textarea name="message" required rows="5" placeholder="Tell us a little about your idea..." /></label>{sendError && <p className="form-error">{sendError}</p>}<button className="button button-primary" type="submit" disabled={isSending}>{isSending ? "Sending..." : submitted ? "Message sent" : "Send message"} <span>↗</span></button></form></div></section>
       </main>
 
       <footer className="site-footer"><div className="site-container footer-grid"><div><a className="brand" href="#home"><span className="brand-mark">H</span><span><strong>Higsi</strong> Forum</span></a><p>Empowering communities,<br />building sustainable futures.</p></div><div><p className="footer-label">Explore</p><a href="#about-us">About us</a><a href="#programs">Programs</a><a href="#our-impact">Our impact</a><a href="#partnerships">Partnerships</a></div><div><p className="footer-label">Focus areas</p><span>Youth · Women · Education</span><span>Skills · Leadership · Community</span></div></div><div className="site-container footer-bottom"><span>© 2026 Higsi Forum. All rights reserved.</span><span>Development & Community Empowerment Organization</span></div></footer>
