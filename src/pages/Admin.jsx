@@ -199,20 +199,24 @@ const Admin = () => {
       );
       values.logo_url = logoUrl || null;
       values.founder_image_url = founderImageUrl || "";
-      const query = content.id
-        ? supabase
-            .from("site_content")
-            .update(values)
-            .eq("id", content.id)
-            .select()
-            .single()
-        : supabase.from("site_content").insert(values).select().single();
-      const { data, error: saveError } = await query;
+      const runSave = (saveValues) => content.id
+        ? supabase.from("site_content").update(saveValues).eq("id", content.id).select().single()
+        : supabase.from("site_content").insert(saveValues).select().single();
+      let founderMigrationMissing = false;
+      let { data, error: saveError } = await runSave(values);
+      if (saveError?.message?.includes("founder_image_url")) {
+        founderMigrationMissing = true;
+        const fallbackValues = { ...values };
+        delete fallbackValues.founder_image_url;
+        ({ data, error: saveError } = await runSave(fallbackValues));
+      }
       if (saveError) throw saveError;
       setContent({ ...emptySiteContent, ...data });
       setNewLogo(null);
       setNewFounderImage(null);
-      setMessage("Website content saved.");
+      setMessage(founderMigrationMissing
+        ? "Website content saved. Run fix-founder-image.sql before uploading a profile image."
+        : "Website content saved.");
     } catch (saveError) {
       setError(saveError.message);
     } finally {
