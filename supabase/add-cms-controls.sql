@@ -1,0 +1,32 @@
+-- Higsi Forum CMS controls. Safe additive migration.
+alter table public.site_content
+  add column if not exists logo_url text,
+  add column if not exists hero_eyebrow text,
+  add column if not exists hero_heading text,
+  add column if not exists hero_text text,
+  add column if not exists hero_note text,
+  add column if not exists about_section_heading text,
+  add column if not exists about_text_secondary text,
+  add column if not exists vision_text text,
+  add column if not exists mission_text text,
+  add column if not exists founder_name text,
+  add column if not exists founder_role text,
+  add column if not exists founder_bio text,
+  add column if not exists programs_section_heading text,
+  add column if not exists programs_section_text text,
+  add column if not exists impact_section_heading text,
+  add column if not exists impact_section_text text,
+  add column if not exists impact_youth text,
+  add column if not exists impact_women text,
+  add column if not exists impact_teachers text,
+  add column if not exists impact_communities text,
+  add column if not exists impact_partnerships text,
+  add column if not exists impact_items jsonb not null default '[]'::jsonb,
+  add column if not exists partnerships_heading text,
+  add column if not exists partnerships_text text,
+  add column if not exists collaboration_heading text,
+  add column if not exists collaboration_items text,
+  add column if not exists contact_display_heading text,
+  add column if not exists contact_display_text text;
+
+notify pgrst, 'reload schema';

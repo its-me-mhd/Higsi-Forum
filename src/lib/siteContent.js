@@ -3,16 +3,16 @@ import { supabase } from "./supabase";
 
 export const emptySiteContent = {
   id: "",
-  full_name: "",
-  job_title: "",
+  full_name: "Higsi Forum",
+  job_title: "Development & Community Empowerment Organization",
   bio_text: "",
   home_text: "",
   about_text: "",
   avatar_url: "",
   cv_url: "",
-  email: "",
-  address: "",
-  phone: "",
+  email: "info@higsiforum.org",
+  address: "Dhaka / Office Location",
+  phone: "+252 [Phone Number]",
   github_url: "",
   linkedin_url: "",
   facebook_url: "",
@@ -23,13 +23,53 @@ export const emptySiteContent = {
   experience_text: "",
   projects_completed_text: "",
   happy_clients_text: "",
-  site_name: "",
+  site_name: "Higsi Forum",
   home_heading: "",
   about_heading: "",
   services_heading: "What I do?",
   contact_heading: "",
   contact_left_heading: "",
   contact_right_heading: "",
+  logo_url: "",
+  hero_eyebrow: "Development & Community Empowerment Organization",
+  hero_heading: "Empowering communities, building sustainable futures.",
+  hero_text:
+    "Welcome to Higsi Forum. We create educational opportunities, professional training, leadership development, entrepreneurship programs, and community-based initiatives that drive sustainable change.",
+  hero_note: "Rooted in people. Designed for lasting impact.",
+  about_section_heading:
+    "Knowledge becomes powerful when communities can use it.",
+  about_text_secondary:
+    "We believe a progressive society requires individuals equipped with knowledge, skills, confidence, creativity, and the power to make impactful decisions.",
+  vision_text:
+    "A skilled, empowered, resilient, and inclusive society where individuals and communities build sustainable futures.",
+  mission_text:
+    "To empower communities through inclusive education, capacity building, innovation, leadership, and sustainable initiatives.",
+  founder_name: "Nadiira Abdirisak Jama",
+  founder_role: "Founder & Chairperson",
+  founder_bio:
+    "With a background in Educational Management and Planning, Nadiira brings experience in education, training, capacity building, youth and women empowerment, leadership, and community development.",
+  programs_section_heading: "Practical programs. Meaningful progress.",
+  programs_section_text:
+    "Our programs respond to real community needs with learning that is relevant, inclusive, and designed to move people from possibility to action.",
+  impact_section_heading:
+    "Creating opportunities. Building capacity. Inspiring change.",
+  impact_section_text:
+    "Higsi Forum does not just provide training; we create opportunities that help people learn, grow, connect, build ideas, and turn them into action.",
+  impact_youth: "320+",
+  impact_women: "180+",
+  impact_teachers: "200+",
+  impact_communities: "15+",
+  impact_partnerships: "12",
+  impact_items: [],
+  partnerships_heading: "Let’s build the next chapter together.",
+  partnerships_text:
+    "Higsi Forum welcomes partnerships with NGOs, development organizations, government institutions, universities, private-sector organizations, donors, and community stakeholders committed to meaningful impact.",
+  collaboration_heading: "Collaboration areas",
+  collaboration_items:
+    "Project partnerships\nTraining partnerships\nCommunity development initiatives\nResearch and education programs\nYouth and women empowerment projects\nCapacity-building projects\nConsultancy and technical support\nJoint programs and events",
+  contact_display_heading: "Have an idea? Let’s talk.",
+  contact_display_text:
+    "Have a project idea, partnership opportunity, training request, or question? We would be happy to hear from you.",
 };
 
 export const useSiteContent = () => {

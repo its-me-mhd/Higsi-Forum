@@ -2,103 +2,623 @@ import { useEffect, useState } from "react";
 import { isAdminUser, isSupabaseConfigured, supabase } from "../lib/supabase";
 import { emptySiteContent } from "../lib/siteContent";
 
-const defaultImpact = {
-  youth: "320+",
-  women: "180+",
-  teachers: "200+",
-  communities: "15+",
-};
+const tabs = ["Website content", "Programs", "Impact", "Settings"];
+const contentFields = [
+  ["hero_eyebrow", "Hero eyebrow", "input"],
+  ["hero_heading", "Hero heading", "input"],
+  ["hero_text", "Hero introduction", "textarea"],
+  ["hero_note", "Hero note", "input"],
+  ["about_section_heading", "About section heading", "input"],
+  ["about_text", "About main text", "textarea"],
+  ["about_text_secondary", "About supporting text", "textarea"],
+  ["vision_text", "Vision", "textarea"],
+  ["mission_text", "Mission", "textarea"],
+  ["founder_name", "Founder name", "input"],
+  ["founder_role", "Founder role", "input"],
+  ["founder_bio", "Founder biography", "textarea"],
+  ["programs_section_heading", "Programs section heading", "input"],
+  ["programs_section_text", "Programs introduction", "textarea"],
+  ["impact_section_heading", "Impact section heading", "input"],
+  ["impact_section_text", "Impact introduction", "textarea"],
+  ["partnerships_heading", "Partnerships heading", "input"],
+  ["partnerships_text", "Partnerships introduction", "textarea"],
+  ["collaboration_heading", "Collaboration heading", "input"],
+  ["collaboration_items", "Collaboration areas (one per line)", "textarea"],
+  ["contact_display_heading", "Contact heading", "input"],
+  ["contact_display_text", "Contact introduction", "textarea"],
+  ["email", "Contact email", "input"],
+  ["phone", "Contact phone", "input"],
+  ["address", "Contact location", "input"],
+];
+const contentColumns = [
+  "full_name",
+  "site_name",
+  "job_title",
+  "home_heading",
+  "about_heading",
+  "services_heading",
+  "contact_heading",
+  "contact_left_heading",
+  "contact_right_heading",
+  "email",
+  "address",
+  "phone",
+  "home_text",
+  "about_text",
+  "services_text",
+  "contact_text",
+  "experience_text",
+  "projects_completed_text",
+  "happy_clients_text",
+  "facebook_url",
+  "instagram_url",
+  "whatsapp_url",
+  "linkedin_url",
+  "avatar_url",
+  "cv_url",
+  ...contentFields.map(([field]) => field),
+  "logo_url",
+  "impact_youth",
+  "impact_women",
+  "impact_teachers",
+  "impact_communities",
+  "impact_partnerships",
+  "impact_items",
+];
 
-const tabs = ["Overview", "Programs", "Impact", "Inquiries", "Settings"];
+const defaultImpactItems = [
+  { metric: "320+", label: "Youth trained and empowered" },
+  { metric: "180+", label: "Women reached through capacity building" },
+  { metric: "200+", label: "Teachers supported through development" },
+  { metric: "15+", label: "Communities engaged in initiatives" },
+  { metric: "12", label: "Partnerships with local stakeholders" },
+];
 
 const Admin = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("Overview");
+  const [activeTab, setActiveTab] = useState("Website content");
   const [content, setContent] = useState(emptySiteContent);
   const [services, setServices] = useState([]);
-  const [service, setService] = useState({ title: "", description: "", sort_order: 0 });
-  const [impact, setImpact] = useState(() => JSON.parse(localStorage.getItem("higsi-impact") || JSON.stringify(defaultImpact)));
+  const [service, setService] = useState({
+    title: "",
+    description: "",
+    sort_order: 0,
+  });
+  const [impactItems, setImpactItems] = useState(defaultImpactItems);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newLogo, setNewLogo] = useState(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!supabase) { setLoading(false); return undefined; }
+    if (!supabase) {
+      setLoading(false);
+      return undefined;
+    }
     const loadSession = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(isAdminUser(data.user) ? data.user : null);
       setLoading(false);
     };
     loadSession();
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => setUser(isAdminUser(session?.user) ? session.user : null));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) =>
+      setUser(isAdminUser(session?.user) ? session.user : null),
+    );
     return () => data.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
-      const [{ data: contentData, error: contentError }, { data: serviceData, error: serviceError }] = await Promise.all([
-        supabase.from("site_content").select("*").limit(1).maybeSingle(),
-        supabase.from("services").select("*").order("sort_order", { ascending: true }),
-      ]);
-      if (contentError) setError(contentError.message);
-      if (contentData) setContent({ ...emptySiteContent, ...contentData });
-      if (serviceError) setError((current) => current || "The services table is not available yet. Run the Supabase migration.");
-      setServices(serviceData || []);
-    };
-    load();
+    Promise.all([
+      supabase.from("site_content").select("*").limit(1).maybeSingle(),
+      supabase
+        .from("services")
+        .select("*")
+        .order("sort_order", { ascending: true }),
+    ]).then(([contentResult, servicesResult]) => {
+      if (contentResult.error) setError(contentResult.error.message);
+      if (contentResult.data) {
+        setContent({ ...emptySiteContent, ...contentResult.data });
+        if (
+          Array.isArray(contentResult.data.impact_items) &&
+          contentResult.data.impact_items.length
+        )
+          setImpactItems(contentResult.data.impact_items);
+      }
+      if (servicesResult.error)
+        setError(
+          (current) =>
+            current ||
+            "The services table is not available. Run the services migration.",
+        );
+      setServices(servicesResult.data || []);
+    });
   }, [user]);
 
-  const login = async (event) => {
-    event.preventDefault(); setError("");
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-    if (loginError || !isAdminUser(data.user)) { await supabase.auth.signOut(); setError("These credentials are not authorized for this dashboard."); }
+  const updateContent = (field, value) =>
+    setContent((current) => ({ ...current, [field]: value }));
+  const restoreDefaultContent = () => {
+    setContent({ ...emptySiteContent, id: content.id });
+    setImpactItems(defaultImpactItems.map((item) => ({ ...item })));
+    setNewLogo(null);
+    setMessage("Default content loaded. Review it, then save when ready.");
+    setError("");
+  };
+  const uploadLogo = async () => {
+    if (!newLogo) return content.logo_url;
+    const path = `logos/${crypto.randomUUID()}-${newLogo.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from("site-assets")
+      .upload(path, newLogo, { cacheControl: "3600", upsert: false });
+    if (uploadError) throw uploadError;
+    return supabase.storage.from("site-assets").getPublicUrl(path).data
+      .publicUrl;
   };
 
   const saveContent = async (event) => {
-    event.preventDefault(); setSaving(true); setError(""); setMessage("");
-    const values = { ...content, id: undefined };
-    delete values.id;
-    const query = content.id ? supabase.from("site_content").update(values).eq("id", content.id).select().single() : supabase.from("site_content").insert(values).select().single();
-    const { data, error: saveError } = await query;
-    if (saveError) setError(saveError.message); else { setContent({ ...emptySiteContent, ...data }); setMessage("Organization profile saved."); }
-    setSaving(false);
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+    setMessage("");
+    try {
+      const logoUrl = await uploadLogo();
+      const values = Object.fromEntries(
+        contentColumns.map((field) => [field, content[field] || null]),
+      );
+      values.logo_url = logoUrl || null;
+      const query = content.id
+        ? supabase
+            .from("site_content")
+            .update(values)
+            .eq("id", content.id)
+            .select()
+            .single()
+        : supabase.from("site_content").insert(values).select().single();
+      const { data, error: saveError } = await query;
+      if (saveError) throw saveError;
+      setContent({ ...emptySiteContent, ...data });
+      setNewLogo(null);
+      setMessage("Website content saved.");
+    } catch (saveError) {
+      setError(saveError.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const addService = async (event) => {
-    event.preventDefault(); setSaving(true); setError("");
-    const { data, error: serviceError } = await supabase.from("services").insert(service).select().single();
-    if (serviceError) setError(serviceError.message); else { setServices((items) => [...items, data]); setService({ title: "", description: "", sort_order: 0 }); setMessage("Program added."); }
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+    const { data, error: serviceError } = await supabase
+      .from("services")
+      .insert({ ...service, sort_order: services.length })
+      .select()
+      .single();
+    if (serviceError) setError(serviceError.message);
+    else {
+      setServices((items) => [...items, data]);
+      setService({ title: "", description: "", sort_order: 0 });
+      setMessage("Program added to the public site.");
+    }
     setSaving(false);
   };
 
   const deleteService = async (id) => {
-    const { error: deleteError } = await supabase.from("services").delete().eq("id", id);
-    if (deleteError) setError(deleteError.message); else setServices((items) => items.filter((item) => item.id !== id));
+    const { error: deleteError } = await supabase
+      .from("services")
+      .delete()
+      .eq("id", id);
+    if (deleteError) setError(deleteError.message);
+    else {
+      setServices((items) => items.filter((item) => item.id !== id));
+      setMessage("Program removed from the public site.");
+    }
   };
 
-  const saveImpact = (event) => {
-    event.preventDefault(); localStorage.setItem("higsi-impact", JSON.stringify(impact)); setMessage("Impact metrics saved locally for this dashboard.");
+  const saveImpact = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+    const values = {
+      impact_items: impactItems.filter(
+        (item) => item.metric.trim() && item.label.trim(),
+      ),
+    };
+    const { error: saveError } = content.id
+      ? await supabase.from("site_content").update(values).eq("id", content.id)
+      : {
+          error: new Error(
+            "Save website content once before saving impact metrics.",
+          ),
+        };
+    if (saveError) setError(saveError.message);
+    else {
+      setContent((current) => ({ ...current, ...values }));
+      setMessage("Impact metrics saved to the public site.");
+    }
+    setSaving(false);
+  };
+
+  const updateAccount = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+    setMessage("");
+    const updates = {};
+    if (email && email !== user.email) updates.email = email;
+    if (password) updates.password = password;
+    if (!Object.keys(updates).length) {
+      setError("Enter a new email or password first.");
+      setSaving(false);
+      return;
+    }
+    const { data, error: updateError } =
+      await supabase.auth.updateUser(updates);
+    if (updateError) setError(updateError.message);
+    else {
+      setUser(data.user);
+      setEmail("");
+      setPassword("");
+      setMessage(
+        updates.email
+          ? "Email updated. Confirm it from your new inbox if Supabase requests confirmation."
+          : "Password updated.",
+      );
+    }
+    setSaving(false);
+  };
+
+  const login = async (event) => {
+    event.preventDefault();
+    setError("");
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (loginError || !isAdminUser(data.user)) {
+      await supabase.auth.signOut();
+      setError("These credentials are not authorized for this dashboard.");
+    }
   };
 
   if (loading) return <main className="admin-loading" />;
-  if (!isSupabaseConfigured) return <main className="admin-login"><div className="admin-login-card"><p className="admin-kicker">Higsi Forum</p><h1>Supabase is not configured.</h1><p>Add the Supabase values to `.env.local`, then restart Vite.</p></div></main>;
-  if (!user) return <main className="admin-login"><form className="admin-login-card" onSubmit={login}><p className="admin-kicker">Higsi Forum Admin</p><h1>Welcome back.</h1><p>Sign in to manage programs, impact, and inquiries.</p><label>Email address<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label><label>Password<input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="remember"><input type="checkbox" /> Remember me</label>{error && <div className="admin-error">{error}</div>}<button className="admin-button" type="submit">Sign in to dashboard</button></form></main>;
+  if (!isSupabaseConfigured)
+    return (
+      <main className="admin-login">
+        <div className="admin-login-card">
+          <p className="admin-kicker">Higsi Forum</p>
+          <h1>Supabase is not configured.</h1>
+          <p>Add the Supabase values to `.env.local`, then restart Vite.</p>
+        </div>
+      </main>
+    );
+  if (!user)
+    return (
+      <main className="admin-login">
+        <form className="admin-login-card" onSubmit={login}>
+          <p className="admin-kicker">Higsi Forum Admin</p>
+          <h1>Welcome back.</h1>
+          <p>Manage the real content published on your website.</p>
+          <label>
+            Email address
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+          {error && <div className="admin-error">{error}</div>}
+          <button className="admin-button" type="submit">
+            Sign in
+          </button>
+        </form>
+      </main>
+    );
 
-  const renderOverview = () => <><div className="admin-page-title"><div><p className="admin-kicker">Good to see you</p><h1>Dashboard overview</h1></div><span className="admin-date">September 2026</span></div><div className="admin-stat-grid"><div><span>Active programs</span><strong>{services.length || 7}</strong><small>Across 7 focus areas</small></div><div><span>Partnership requests</span><strong>14</strong><small className="gold-text">Pending review</small></div><div><span>Youth trained</span><strong>{impact.youth}</strong><small>Impact metric</small></div><div><span>Unread messages</span><strong>5</strong><small>Needs your attention</small></div></div><div className="admin-content-grid"><section className="admin-panel"><div className="admin-panel-heading"><h2>Recent activity</h2><span>Last 30 days</span></div>{["Program content updated", "New partnership inquiry received", "Impact metrics reviewed", "Teacher training program added"].map((item, index) => <div className="activity-row" key={item}><span className="activity-dot" /><div><strong>{item}</strong><small>{index + 1} day{index ? "s" : ""} ago · Higsi Forum CMS</small></div></div>)}</section><section className="admin-panel admin-callout"><p className="admin-kicker">Keep moving</p><h2>Your work creates the conditions for people to thrive.</h2><p>Keep the public site current with the programs, partnerships, and impact stories your community needs to see.</p><button className="admin-link" onClick={() => setActiveTab("Programs")}>Manage programs →</button></section></div></>;
+  const renderContent = () => (
+    <form
+      className="admin-panel admin-form content-editor"
+      onSubmit={saveContent}
+    >
+      <div className="admin-panel-heading">
+        <div>
+          <p className="admin-kicker">Website content</p>
+          <h2>Edit what visitors see</h2>
+        </div>
+        <span>Saved to Supabase</span>
+      </div>
+      <div className="content-actions">
+        <button className="admin-link" type="button" onClick={restoreDefaultContent}>
+          Keep the default content
+        </button>
+        <small>
+          Loads the original Higsi Forum text into every field. You can edit
+          individual sections before saving.
+        </small>
+      </div>
+      <div className="settings-grid">
+        {contentFields.map(([field, label, type]) => (
+          <label
+            className={type === "textarea" ? "full-field" : ""}
+            key={field}
+          >
+            {label}
+            {type === "textarea" ? (
+              <textarea
+                rows="4"
+                value={content[field] || ""}
+                onChange={(event) => updateContent(field, event.target.value)}
+              />
+            ) : (
+              <input
+                value={content[field] || ""}
+                onChange={(event) => updateContent(field, event.target.value)}
+              />
+            )}
+          </label>
+        ))}
+        <label className="full-field">
+          Logo
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            onChange={(event) => setNewLogo(event.target.files?.[0] || null)}
+          />
+          <small>
+            {content.logo_url
+              ? "A custom logo is active. Leave empty to keep it."
+              : "No custom logo yet. The default H mark will be used."}
+          </small>
+        </label>
+      </div>
+      <button className="admin-button" disabled={saving}>
+        {saving ? "Saving..." : "Save website content"}
+      </button>
+    </form>
+  );
+  const renderPrograms = () => (
+    <>
+      <div className="admin-page-title">
+        <div>
+          <p className="admin-kicker">Public website</p>
+          <h1>Programs</h1>
+        </div>
+        <span className="admin-pill">{services.length} published</span>
+      </div>
+      <div className="admin-two-column">
+        <form className="admin-panel admin-form" onSubmit={addService}>
+          <div className="admin-panel-heading">
+            <h2>Add program</h2>
+            <span>Appears on the site</span>
+          </div>
+          <label>
+            Program title
+            <input
+              required
+              value={service.title}
+              placeholder="Program title"
+              onChange={(event) =>
+                setService({ ...service, title: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            Program description
+            <textarea
+              required
+              rows="6"
+              value={service.description}
+              placeholder="What does this program offer?"
+              onChange={(event) =>
+                setService({ ...service, description: event.target.value })
+              }
+            />
+          </label>
+          <button className="admin-button" disabled={saving}>
+            Add program
+          </button>
+        </form>
+        <section className="admin-panel">
+          <div className="admin-panel-heading">
+            <h2>Published programs</h2>
+            <span>Shown in order</span>
+          </div>
+          {services.map((item) => (
+            <div className="program-admin-row" key={item.id}>
+              <div>
+                <strong>{item.title}</strong>
+                <p>{item.description}</p>
+              </div>
+              <button
+                className="delete-button"
+                type="button"
+                onClick={() => deleteService(item.id)}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </section>
+      </div>
+    </>
+  );
+  const renderImpact = () => (
+    <form className="admin-panel admin-form impact-form" onSubmit={saveImpact}>
+      <div className="admin-panel-heading">
+        <div>
+          <p className="admin-kicker">Public website</p>
+          <h2>Impact numbers</h2>
+        </div>
+        <span>Shown in section 03</span>
+      </div>
+      <p>Add, edit, or remove the rows shown in the public Impact section.</p>
+      <div className="impact-editor-list">
+        {impactItems.map((item, index) => (
+          <div className="impact-editor-row" key={`${index}-${item.label}`}>
+            <input
+              aria-label="Impact number"
+              value={item.metric}
+              placeholder="320+"
+              onChange={(event) =>
+                setImpactItems((items) =>
+                  items.map((current, itemIndex) =>
+                    itemIndex === index
+                      ? { ...current, metric: event.target.value }
+                      : current,
+                  ),
+                )
+              }
+            />
+            <input
+              aria-label="Impact label"
+              value={item.label}
+              placeholder="Youth trained"
+              onChange={(event) =>
+                setImpactItems((items) =>
+                  items.map((current, itemIndex) =>
+                    itemIndex === index
+                      ? { ...current, label: event.target.value }
+                      : current,
+                  ),
+                )
+              }
+            />
+            <button
+              className="delete-button"
+              type="button"
+              onClick={() =>
+                setImpactItems((items) =>
+                  items.filter((_current, itemIndex) => itemIndex !== index),
+                )
+              }
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+      <button
+        className="admin-link"
+        type="button"
+        onClick={() =>
+          setImpactItems((items) => [...items, { metric: "", label: "" }])
+        }
+      >
+        + Add impact row
+      </button>
+      <button className="admin-button" disabled={saving}>
+        {saving ? "Saving..." : "Save impact numbers"}
+      </button>
+    </form>
+  );
+  const renderSettings = () => (
+    <form
+      className="admin-panel admin-form settings-form"
+      onSubmit={updateAccount}
+    >
+      <div className="admin-panel-heading">
+        <div>
+          <p className="admin-kicker">Account security</p>
+          <h2>Admin account</h2>
+        </div>
+        <span>Supabase Auth</span>
+      </div>
+      <p>
+        Change the login email or password without opening Supabase. Leave
+        either field empty to keep it unchanged.
+      </p>
+      <label>
+        New admin email
+        <input
+          type="email"
+          value={email}
+          placeholder={user.email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+      </label>
+      <label>
+        New password
+        <input
+          type="password"
+          minLength="6"
+          value={password}
+          placeholder="At least 6 characters"
+          onChange={(event) => setPassword(event.target.value)}
+        />
+      </label>
+      <button className="admin-button" disabled={saving}>
+        {saving ? "Updating..." : "Update account"}
+      </button>
+    </form>
+  );
 
-  const renderPrograms = () => <><div className="admin-page-title"><div><p className="admin-kicker">Content management</p><h1>Programs manager</h1></div><span className="admin-pill">{services.length} published</span></div><div className="admin-two-column"><form className="admin-panel admin-form" onSubmit={addService}><div className="admin-panel-heading"><h2>Add new program</h2><span>Publish instantly</span></div><label>Program title<input required value={service.title} placeholder="e.g. Youth Empowerment" onChange={(event) => setService({ ...service, title: event.target.value })} /></label><label>Short description<textarea required rows="5" value={service.description} placeholder="What will participants gain?" onChange={(event) => setService({ ...service, description: event.target.value })} /></label><button className="admin-button" disabled={saving}>Add program</button></form><section className="admin-panel"><div className="admin-panel-heading"><h2>Active programs</h2><span>Manage content</span></div>{services.length ? services.map((item) => <div className="program-admin-row" key={item.id}><div><strong>{item.title}</strong><p>{item.description}</p></div><button className="delete-button" onClick={() => deleteService(item.id)}>Delete</button></div>) : <p className="admin-empty">No programs yet. Add your first program to publish it.</p>}</section></div></>;
-
-  const renderImpact = () => <><div className="admin-page-title"><div><p className="admin-kicker">Public website</p><h1>Impact metrics</h1></div><span className="admin-pill">Live content</span></div><form className="admin-panel impact-form" onSubmit={saveImpact}><div className="admin-panel-heading"><h2>Numbers that tell the story</h2><span>Update anytime</span></div><p>These counters make your community impact visible at a glance. Keep them current as programs grow.</p><div className="impact-input-grid">{[["youth", "Youth trained & empowered"], ["women", "Women reached"], ["teachers", "Teachers supported"], ["communities", "Communities engaged"]].map(([key, label]) => <label key={key}>{label}<input value={impact[key]} onChange={(event) => setImpact({ ...impact, [key]: event.target.value })} /></label>)}</div><button className="admin-button" type="submit">Save impact metrics</button></form></>;
-
-  const renderInquiries = () => <><div className="admin-page-title"><div><p className="admin-kicker">Stay connected</p><h1>Partnership & contact inquiries</h1></div><span className="admin-pill">5 unread</span></div><section className="admin-panel inquiry-panel"><div className="inquiry-tabs"><button className="active" type="button">All inquiries</button><button type="button">Partnerships</button><button type="button">General queries</button></div><div className="inquiry-table"><div className="inquiry-head"><span>Sender</span><span>Organization</span><span>Type</span><span>Status</span><span /></div>{[["Amina Yusuf", "Community Learning Hub", "Partnership", "Pending"], ["Mohamed Ali", "Somali Educators Network", "Training", "Reviewed"], ["Sahra Hassan", "Independent", "General query", "Pending"]].map((item) => <div className="inquiry-row" key={item[0]}><strong>{item[0]}</strong><span>{item[1]}</span><span>{item[2]}</span><b className={item[3].toLowerCase()}>{item[3]}</b><button type="button">View</button></div>)}</div></section></>;
-
-  const renderSettings = () => <><div className="admin-page-title"><div><p className="admin-kicker">Organization profile</p><h1>Settings</h1></div></div><form className="admin-panel admin-form settings-form" onSubmit={saveContent}><div className="admin-panel-heading"><h2>Public organization details</h2><span>Supabase connected</span></div><div className="settings-grid"><label>Organization name<input value={content.full_name || "Higsi Forum"} onChange={(event) => setContent({ ...content, full_name: event.target.value })} /></label><label>Official email<input type="email" value={content.email || ""} onChange={(event) => setContent({ ...content, email: event.target.value })} /></label><label>Phone number<input value={content.phone || ""} onChange={(event) => setContent({ ...content, phone: event.target.value })} /></label><label>Location / office<input value={content.address || ""} onChange={(event) => setContent({ ...content, address: event.target.value })} /></label><label className="full-field">Organization description<textarea rows="5" value={content.about_text || ""} onChange={(event) => setContent({ ...content, about_text: event.target.value })} /></label></div><button className="admin-button" type="submit" disabled={saving}>Save organization profile</button></form></>;
-
-  return <main className="admin-shell"><aside className="admin-sidebar"><a className="admin-brand" href="/"><span className="brand-mark">H</span><span><strong>Higsi</strong> Forum <small>Admin</small></span></a><nav>{tabs.map((tab) => <button key={tab} className={activeTab === tab ? "active" : ""} onClick={() => { setActiveTab(tab); setMessage(""); setError(""); }}><span>{["⌂", "◫", "◈", "◎", "⚙"][tabs.indexOf(tab)]}</span>{tab}</button>)}</nav><button className="admin-signout" onClick={() => supabase.auth.signOut()}>↪ Sign out</button></aside><section className="admin-main"><header className="admin-topbar"><span>Higsi Forum / {activeTab}</span><div><span className="admin-avatar">{user.email?.charAt(0).toUpperCase()}</span>{user.email}</div></header>{message && <div className="admin-success">{message}</div>}{error && <div className="admin-error admin-banner">{error}</div>}<div className="admin-content">{activeTab === "Overview" && renderOverview()}{activeTab === "Programs" && renderPrograms()}{activeTab === "Impact" && renderImpact()}{activeTab === "Inquiries" && renderInquiries()}{activeTab === "Settings" && renderSettings()}</div></section></main>;
+  return (
+    <main className="admin-shell">
+      <aside className="admin-sidebar">
+        <a className="admin-brand" href="/">
+          <span className="brand-mark">H</span>
+          <span>
+            <strong>Higsi</strong> Forum <small>Admin</small>
+          </span>
+        </a>
+        <nav>
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              className={activeTab === tab ? "active" : ""}
+              onClick={() => {
+                setActiveTab(tab);
+                setMessage("");
+                setError("");
+              }}
+            >
+              <span>{["▤", "◫", "◈", "⚙"][tabs.indexOf(tab)]}</span>
+              {tab}
+            </button>
+          ))}
+        </nav>
+        <button
+          className="admin-signout"
+          onClick={() => supabase.auth.signOut()}
+        >
+          ↪ Sign out
+        </button>
+      </aside>
+      <section className="admin-main">
+        <header className="admin-topbar">
+          <span>Higsi Forum / {activeTab}</span>
+          <div>
+            <span className="admin-avatar">
+              {user.email?.charAt(0).toUpperCase()}
+            </span>
+            {user.email}
+          </div>
+        </header>
+        {message && <div className="admin-success">{message}</div>}
+        {error && <div className="admin-error admin-banner">{error}</div>}
+        <div className="admin-content">
+          {activeTab === "Website content" && renderContent()}
+          {activeTab === "Programs" && renderPrograms()}
+          {activeTab === "Impact" && renderImpact()}
+          {activeTab === "Settings" && renderSettings()}
+        </div>
+      </section>
+    </main>
+  );
 };
 
 export default Admin;
