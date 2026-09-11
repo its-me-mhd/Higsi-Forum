@@ -99,7 +99,12 @@ const Home = () => {
       event.currentTarget.reset();
       setSubmitted(true);
     } catch (error) {
-      setSendError(error?.text || "Your message could not be sent. Please try again.");
+      const errorText = error?.text || "";
+      setSendError(
+        errorText.toLowerCase().includes("invalid grant")
+          ? "Email delivery is temporarily unavailable. Please reconnect the Gmail account in EmailJS, then try again."
+          : errorText || "Your message could not be sent. Please try again.",
+      );
     } finally {
       setIsSending(false);
     }
