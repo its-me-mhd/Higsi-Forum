@@ -30,4 +30,5 @@ alter table public.site_content
   add column if not exists contact_display_heading text,
   add column if not exists contact_display_text text;
 
-notify pgrst, 'reload schema';
+notify pgrst, 'reload schema'
+

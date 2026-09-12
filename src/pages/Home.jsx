@@ -211,13 +211,24 @@ const Home = () => {
             >
               <div className="visual-orbit orbit-one" />
               <div className="visual-orbit orbit-two" />
-              <div className={`visual-card visual-main ${content.logo_url ? "has-custom-logo" : ""}`}>
+              <div
+                className={`visual-card visual-main ${content.logo_url ? "has-custom-logo" : ""}`}
+              >
                 {content.logo_url ? (
-                  <img className="visual-logo" src={content.logo_url} alt="Higsi Forum" />
+                  <img
+                    className="visual-logo"
+                    src={content.logo_url}
+                    alt="Higsi Forum"
+                  />
                 ) : (
                   <span>H</span>
                 )}
-                {!content.logo_url && <><strong>People first.</strong><small>Progress together.</small></>}
+                {!content.logo_url && (
+                  <>
+                    <strong>People first.</strong>
+                    <small>Progress together.</small>
+                  </>
+                )}
               </div>
               <div className="visual-card visual-stat">
                 <strong>7</strong>
@@ -258,7 +269,17 @@ const Home = () => {
             </div>
           </div>
           <div className="site-container founder-row">
-            {content.founder_image_url ? <img className="founder-avatar founder-image" src={content.founder_image_url} alt={content.founder_name} /> : <div className="founder-avatar">{content.founder_name?.charAt(0) || "N"}</div>}
+            {content.founder_image_url ? (
+              <img
+                className="founder-avatar founder-image"
+                src={content.founder_image_url}
+                alt={content.founder_name}
+              />
+            ) : (
+              <div className="founder-avatar">
+                {content.founder_name?.charAt(0) || "N"}
+              </div>
+            )}
             <div>
               <p className="eyebrow">Leadership profile</p>
               <h3>

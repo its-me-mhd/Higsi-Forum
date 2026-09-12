@@ -75,13 +75,34 @@ const defaultImpactItems = [
   { metric: "12", label: "Partnerships with local stakeholders" },
 ];
 const defaultPrograms = [
-  ["Youth Empowerment & Skills Development", "Practical pathways to confidence, employability, leadership, communication, entrepreneurship, and career readiness."],
-  ["Women Empowerment", "Inclusive development programs that strengthen personal growth, digital confidence, financial awareness, and business capacity."],
-  ["Teacher Training & Professional Development", "Relevant, classroom-ready learning for educators who want to improve teaching quality and support every learner."],
-  ["Education & Capacity Building", "Workshops and training-of-trainers programs that turn knowledge into capability across institutions and communities."],
-  ["Leadership & Personal Development", "Human-centered development for people ready to lead with self-awareness, resilience, good judgment, and purpose."],
-  ["Community Development", "Locally grounded initiatives that build participation, awareness, resilience, innovation, and shared ownership."],
-  ["Entrepreneurship & Innovation", "A practical space for new ideas, business capacity, and economic opportunities, especially for youth and women."],
+  [
+    "Youth Empowerment & Skills Development",
+    "Practical pathways to confidence, employability, leadership, communication, entrepreneurship, and career readiness.",
+  ],
+  [
+    "Women Empowerment",
+    "Inclusive development programs that strengthen personal growth, digital confidence, financial awareness, and business capacity.",
+  ],
+  [
+    "Teacher Training & Professional Development",
+    "Relevant, classroom-ready learning for educators who want to improve teaching quality and support every learner.",
+  ],
+  [
+    "Education & Capacity Building",
+    "Workshops and training-of-trainers programs that turn knowledge into capability across institutions and communities.",
+  ],
+  [
+    "Leadership & Personal Development",
+    "Human-centered development for people ready to lead with self-awareness, resilience, good judgment, and purpose.",
+  ],
+  [
+    "Community Development",
+    "Locally grounded initiatives that build participation, awareness, resilience, innovation, and shared ownership.",
+  ],
+  [
+    "Entrepreneurship & Innovation",
+    "A practical space for new ideas, business capacity, and economic opportunities, especially for youth and women.",
+  ],
 ];
 
 const Admin = () => {
@@ -178,9 +199,12 @@ const Admin = () => {
   const uploadFounderImage = async () => {
     if (!newFounderImage) return content.founder_image_url;
     const path = `founders/${crypto.randomUUID()}-${newFounderImage.name}`;
-    const { error: uploadError } = await supabase.storage.from("site-assets").upload(path, newFounderImage, { cacheControl: "3600", upsert: false });
+    const { error: uploadError } = await supabase.storage
+      .from("site-assets")
+      .upload(path, newFounderImage, { cacheControl: "3600", upsert: false });
     if (uploadError) throw uploadError;
-    return supabase.storage.from("site-assets").getPublicUrl(path).data.publicUrl;
+    return supabase.storage.from("site-assets").getPublicUrl(path).data
+      .publicUrl;
   };
 
   const saveContent = async (event) => {
@@ -199,9 +223,15 @@ const Admin = () => {
       );
       values.logo_url = logoUrl || null;
       values.founder_image_url = founderImageUrl || "";
-      const runSave = (saveValues) => content.id
-        ? supabase.from("site_content").update(saveValues).eq("id", content.id).select().single()
-        : supabase.from("site_content").insert(saveValues).select().single();
+      const runSave = (saveValues) =>
+        content.id
+          ? supabase
+              .from("site_content")
+              .update(saveValues)
+              .eq("id", content.id)
+              .select()
+              .single()
+          : supabase.from("site_content").insert(saveValues).select().single();
       let founderMigrationMissing = false;
       let { data, error: saveError } = await runSave(values);
       if (saveError?.message?.includes("founder_image_url")) {
@@ -214,9 +244,11 @@ const Admin = () => {
       setContent({ ...emptySiteContent, ...data });
       setNewLogo(null);
       setNewFounderImage(null);
-      setMessage(founderMigrationMissing
-        ? "Website content saved. Run fix-founder-image.sql before uploading a profile image."
-        : "Website content saved.");
+      setMessage(
+        founderMigrationMissing
+          ? "Website content saved. Run fix-founder-image.sql before uploading a profile image."
+          : "Website content saved.",
+      );
     } catch (saveError) {
       setError(saveError.message);
     } finally {
@@ -265,7 +297,13 @@ const Admin = () => {
     else {
       const { data, error: insertError } = await supabase
         .from("services")
-        .insert(defaultPrograms.map(([title, description], sort_order) => ({ title, description, sort_order })))
+        .insert(
+          defaultPrograms.map(([title, description], sort_order) => ({
+            title,
+            description,
+            sort_order,
+          })),
+        )
         .select()
         .order("sort_order", { ascending: true });
       if (insertError) setError(insertError.message);
@@ -405,7 +443,11 @@ const Admin = () => {
         <span>Saved to Supabase</span>
       </div>
       <div className="content-actions">
-        <button className="admin-link" type="button" onClick={restoreDefaultContent}>
+        <button
+          className="admin-link"
+          type="button"
+          onClick={restoreDefaultContent}
+        >
           Keep the default content
         </button>
         <small>
@@ -449,8 +491,18 @@ const Admin = () => {
         </label>
         <label className="full-field">
           Founder profile image
-          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setNewFounderImage(event.target.files?.[0] || null)} />
-          <small>{content.founder_image_url ? "A founder profile image is active. Upload another to replace it." : "No profile image yet. The default initial will be used."}</small>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(event) =>
+              setNewFounderImage(event.target.files?.[0] || null)
+            }
+          />
+          <small>
+            {content.founder_image_url
+              ? "A founder profile image is active. Upload another to replace it."
+              : "No profile image yet. The default initial will be used."}
+          </small>
         </label>
       </div>
       <button className="admin-button" disabled={saving}>
@@ -468,8 +520,18 @@ const Admin = () => {
         <span className="admin-pill">{services.length} published</span>
       </div>
       <div className="content-actions">
-        <button className="admin-link" type="button" onClick={restoreDefaultPrograms} disabled={saving}>Keep the default programs</button>
-        <small>Restores the original program list, then you can remove or add individual programs.</small>
+        <button
+          className="admin-link"
+          type="button"
+          onClick={restoreDefaultPrograms}
+          disabled={saving}
+        >
+          Keep the default programs
+        </button>
+        <small>
+          Restores the original program list, then you can remove or add
+          individual programs.
+        </small>
       </div>
       <div className="admin-two-column">
         <form className="admin-panel admin-form" onSubmit={addService}>
@@ -539,7 +601,13 @@ const Admin = () => {
       </div>
       <p>Add, edit, or remove the rows shown in the public Impact section.</p>
       <div className="content-actions">
-        <button className="admin-link" type="button" onClick={restoreDefaultImpact}>Keep the default impact</button>
+        <button
+          className="admin-link"
+          type="button"
+          onClick={restoreDefaultImpact}
+        >
+          Keep the default impact
+        </button>
         <small>Loads the original impact rows for review before saving.</small>
       </div>
       <div className="impact-editor-list">

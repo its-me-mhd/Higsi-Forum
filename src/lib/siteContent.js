@@ -114,11 +114,13 @@ export const useSiteContent = () => {
 
         if (legacyError) setError(fetchError.message);
         else if (legacyData) {
-          setContent(mergeContent({
-            ...legacyData,
-            home_text: legacyData.bio_text || emptySiteContent.home_text,
-            about_text: legacyData.bio_text || emptySiteContent.about_text,
-          }));
+          setContent(
+            mergeContent({
+              ...legacyData,
+              home_text: legacyData.bio_text || emptySiteContent.home_text,
+              about_text: legacyData.bio_text || emptySiteContent.about_text,
+            }),
+          );
         }
         setIsLoading(false);
         return;
