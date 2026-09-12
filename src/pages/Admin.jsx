@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { isAdminUser, isSupabaseConfigured, supabase } from "../lib/supabase";
 import { emptySiteContent } from "../lib/siteContent";
@@ -713,13 +714,12 @@ const Admin = () => {
   return (
     <main className="admin-shell">
       <aside className="admin-sidebar">
-        <aside className="admin-sidebar">
-  <Link className="admin-brand" to="/">
-    <span className="brand-mark">H</span>
-    <span>
-      <strong>Higsi</strong> Forum <small>Admin</small>
-    </span>
-  </Link>
+        <Link className="admin-brand" to="/">
+          <span className="brand-mark">H</span>
+          <span>
+            <strong>Higsi</strong> Forum <small>Admin</small>
+          </span>
+        </Link>
         <nav>
           {tabs.map((tab) => (
             <button
