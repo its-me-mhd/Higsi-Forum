@@ -713,12 +713,13 @@ const Admin = () => {
   return (
     <main className="admin-shell">
       <aside className="admin-sidebar">
-        <a className="admin-brand" href="/">
-          <span className="brand-mark">H</span>
-          <span>
-            <strong>Higsi</strong> Forum <small>Admin</small>
-          </span>
-        </a>
+        <aside className="admin-sidebar">
+  <Link className="admin-brand" to="/">
+    <span className="brand-mark">H</span>
+    <span>
+      <strong>Higsi</strong> Forum <small>Admin</small>
+    </span>
+  </Link>
         <nav>
           {tabs.map((tab) => (
             <button
