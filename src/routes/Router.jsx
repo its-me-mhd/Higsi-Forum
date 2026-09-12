@@ -5,27 +5,30 @@ const Home = lazy(() => import("../pages/Home"));
 const Main = lazy(() => import("../layouts/Main"));
 const Admin = lazy(() => import("../pages/Admin"));
 
-export const router = createBrowserRouter([
-  {
-    path: "/admin",
-    element: (
-      <Suspense fallback={<Loading />}>
-        <Admin />
-      </Suspense>
-    ),
-  },
-  {
-    path: `/`,
-    element: (
-      <Suspense fallback={<Loading />}>
-        <Main />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: <Home></Home>,
-      },
-    ],
-  },
-]);
+export const router = createBrowserRouter(
+  [
+    {
+      path: "/admin",
+      element: (
+        <Suspense fallback={<Loading />}>
+          <Admin />
+        </Suspense>
+      ),
+    },
+    {
+      path: "/",
+      element: (
+        <Suspense fallback={<Loading />}>
+          <Main />
+        </Suspense>
+      ),
+      children: [
+        {
+          index: true,
+          element: <Home />,
+        },
+      ],
+    },
+  ],
+  { basename: "/Higsi-Forum" },
+);
