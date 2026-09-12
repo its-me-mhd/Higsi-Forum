@@ -1,11 +1,11 @@
 import { lazy, Suspense } from "react";
-import { createHashRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import Loading from "../components/common/loading/Loading";
 const Home = lazy(() => import("../pages/Home"));
 const Main = lazy(() => import("../layouts/Main"));
 const Admin = lazy(() => import("../pages/Admin"));
 
-export const router = createHashRouter([
+export const router = createBrowserRouter([
   {
     path: "/admin",
     element: (
