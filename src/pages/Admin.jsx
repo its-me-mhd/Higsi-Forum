@@ -691,7 +691,7 @@ const Admin = () => {
         <input
           type="email"
           value={email}
-          placeholder={user.email}
+          placeholder="your-email@gmail.com"
           onChange={(event) => setEmail(event.target.value)}
         />
       </label>
