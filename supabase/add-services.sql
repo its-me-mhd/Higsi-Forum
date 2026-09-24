@@ -23,17 +23,17 @@ using (true);
 create policy "Owner can insert services"
 on public.services for insert
 to authenticated
-with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+with check ((select auth.uid()) in (select id from public.admin_users));
 
 create policy "Owner can update services"
 on public.services for update
 to authenticated
-using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid)
-with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+using ((select auth.uid()) in (select id from public.admin_users))
+with check ((select auth.uid()) in (select id from public.admin_users));
 
 create policy "Owner can delete services"
 on public.services for delete
 to authenticated
-using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+using ((select auth.uid()) in (select id from public.admin_users));
 
 notify pgrst, 'reload schema';

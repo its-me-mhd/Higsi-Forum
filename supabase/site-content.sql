@@ -1,5 +1,9 @@
 create extension if not exists pgcrypto;
 
+create table if not exists public.admin_users (
+  id uuid primary key
+);
+
 create table if not exists public.site_content (
   id uuid primary key default gen_random_uuid(),
   full_name text not null,
@@ -78,13 +82,13 @@ to anon, authenticated using (true);
 create policy "Owner can insert site content"
 on public.site_content for insert
 to authenticated
-with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+with check ((select auth.uid()) in (select id from public.admin_users));
 
 create policy "Owner can update site content"
 on public.site_content for update
 to authenticated
-using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid)
-with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+using ((select auth.uid()) in (select id from public.admin_users))
+with check ((select auth.uid()) in (select id from public.admin_users));
 
 create policy "Public can read projects"
 on public.projects for select
@@ -93,12 +97,12 @@ to anon, authenticated using (true);
 create policy "Owner can insert projects"
 on public.projects for insert
 to authenticated
-with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+with check ((select auth.uid()) in (select id from public.admin_users));
 
 create policy "Owner can delete projects"
 on public.projects for delete
 to authenticated
-using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+using ((select auth.uid()) in (select id from public.admin_users));
 
 create policy "Public can read services"
 on public.services for select
@@ -107,18 +111,18 @@ to anon, authenticated using (true);
 create policy "Owner can insert services"
 on public.services for insert
 to authenticated
-with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+with check ((select auth.uid()) in (select id from public.admin_users));
 
 create policy "Owner can update services"
 on public.services for update
 to authenticated
-using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid)
-with check ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+using ((select auth.uid()) in (select id from public.admin_users))
+with check ((select auth.uid()) in (select id from public.admin_users));
 
 create policy "Owner can delete services"
 on public.services for delete
 to authenticated
-using ((select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid);
+using ((select auth.uid()) in (select id from public.admin_users));
 
 insert into storage.buckets (id, name, public)
 values ('site-assets', 'site-assets', true)
@@ -138,7 +142,7 @@ on storage.objects for insert
 to authenticated
 with check (
   bucket_id = 'site-assets'
-  and (select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid
+  and (select auth.uid()) in (select id from public.admin_users)
 );
 
 create policy "Owner can delete site assets"
@@ -146,5 +150,5 @@ on storage.objects for delete
 to authenticated
 using (
   bucket_id = 'site-assets'
-  and (select auth.uid()) = 'be944c66-8626-4f97-90da-60892b9168e7'::uuid
+  and (select auth.uid()) in (select id from public.admin_users)
 );
