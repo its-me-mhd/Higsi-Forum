@@ -154,14 +154,15 @@ const Admin = () => {
     ]).then(([contentResult, servicesResult]) => {
       if (contentResult.error) setError(contentResult.error.message);
       if (contentResult.data) {
-        setContent(
-          Object.fromEntries(
+        setContent({
+          ...Object.fromEntries(
             Object.entries(emptySiteContent).map(([key, fallback]) => [
               key,
               contentResult.data[key] ?? fallback,
             ]),
           ),
-        );
+          id: contentResult.data.id,
+        });
         if (
           Array.isArray(contentResult.data.impact_items) &&
           contentResult.data.impact_items.length
@@ -231,8 +232,12 @@ const Admin = () => {
               .update(saveValues)
               .eq("id", content.id)
               .select()
-              .single()
-          : supabase.from("site_content").insert(saveValues).select().single();
+              .maybeSingle()
+          : supabase
+              .from("site_content")
+              .insert(saveValues)
+              .select()
+              .maybeSingle();
       let founderMigrationMissing = false;
       let { data, error: saveError } = await runSave(values);
       if (saveError?.message?.includes("founder_image_url")) {
@@ -242,6 +247,11 @@ const Admin = () => {
         ({ data, error: saveError } = await runSave(fallbackValues));
       }
       if (saveError) throw saveError;
+      if (!data) {
+        throw new Error(
+          "Save was blocked by permissions: your account isn't listed in admin_users, so the database silently rejected the update. Add your user id to public.admin_users and try again.",
+        );
+      }
       setContent({ ...emptySiteContent, ...data });
       setNewLogo(null);
       setNewFounderImage(null);
@@ -265,9 +275,13 @@ const Admin = () => {
       .from("services")
       .insert({ ...service, sort_order: services.length })
       .select()
-      .single();
+      .maybeSingle();
     if (serviceError) setError(serviceError.message);
-    else {
+    else if (!data) {
+      setError(
+        "Add was blocked by permissions: your account isn't listed in admin_users.",
+      );
+    } else {
       setServices((items) => [...items, data]);
       setService({ title: "", description: "", sort_order: 0 });
       setMessage("Program added to the public site.");
